@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ HighGrade DLI   Advanced</title>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --secondary: #3949ab;
+            --accent: #5c6bc0;
+            --gold: #ffd700;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --warning: #ef6c00;
+            --white: #ffffff;
+            --light: #f5f7ff;
+            --dark-text: #0a0e27;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, #1a237e 0%, #3949ab 50%, #5c6bc0 100%);
+            --border-color: #ddd;
+            --card-bg: #fff;
+        }
+
+        [data-theme="dark"] {
+            --primary: #5c6bc0;
+            --secondary: #7986cb;
+            --accent: #9fa8da;
+            --white: #1e2338;
+            --light: #121525;
+            --dark-text: #f0f4ff;
+            --glass: rgba(30, 35, 60, 0.95);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --border-color: #444;
+            --card-bg: #252b45;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.3s, color 0.3s; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--gradient);
+            background-attachment: fixed;
+            color: var(--dark-text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;            line-height: 1.6;
+        }
+
+        .container {
+            background: var(--glass);
+            width: 100%;
+            max-width: 900px;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.6s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--accent); }
+        .logo h1 { font-size: 2.2rem; color: var(--primary); text-shadow: 0 2px 4px rgba(0,0,0,0.1); letter-spacing: -0.5px; }
+        .logo span { color: var(--gold); font-weight: 800; }
+        
+        h2 { color: var(--primary); margin: 1.5rem 0 1rem; font-weight: 600; }
+        h3 { color: var(--primary); margin: 1.5rem 0 1rem; font-weight: 600; font-size: 1.3rem; }
+        p { margin-bottom: 1rem; color: var(--dark-text); opacity: 0.9; }
+        strong { color: var(--primary); }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            margin: 8px 0 16px;
+            font-size: 16px;
+            background: var(--card-bg);
+            color: var(--dark-text);
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.15);
+        }
+
+        button {
+            padding: 14px 28px;            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 8px 4px;
+            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4); }
+        button:active { transform: translateY(0); }
+        button.secondary { background: #6c757d; box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3); }
+        button.secondary:hover { background: #5a6268; }
+        button.gold { background: linear-gradient(135deg, #ffd700, #ffb300); color: #333; font-weight: 700; }
+        button.gold:hover { box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
+        button.delete-btn { background: var(--danger); padding: 8px 16px; font-size: 14px; margin: 4px; }
+        button.delete-btn:hover { background: #b71c1c; }
+        button.edit-btn { background: var(--accent); padding: 8px 16px; font-size: 14px; margin: 4px; }
+        button.edit-btn:hover { background: #3f51b5; }
+
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .table-container { overflow-x: auto; margin: 20px 0; border-radius: 12px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--dark-text); }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:hover { background: rgba(0,0,0,0.05); }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gradient);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .timer-container { text-align: center; flex: 1; }
+        .timer-bar { height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        .timer-progress { height: 100%; background: #4caf50; border-radius: 4px; transition: width 1s linear, background 0.5s; width: 100%; }
+        .timer-progress.blue { background: #2196f3; }
+        .timer-progress.red { background: #f44336; }
+        .question-box {            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--secondary);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .question-text { font-size: 1.25rem; font-weight: 500; color: var(--primary); margin-bottom: 10px; }
+        
+        .bookmark-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: none;
+            margin: 0;
+        }
+        .bookmark-btn.bookmarked {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: white;
+        }
+
+        .options-grid { display: grid; gap: 12px; margin-bottom: 25px; }
+        .option-btn {
+            background: var(--card-bg);
+            color: var(--dark-text);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option-btn:hover:not(:disabled) { background: var(--light); border-color: var(--secondary); transform: translateX(4px); }
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+        .option-label {
+            background: var(--primary); color: white; width: 32px; height: 32px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; flex-shrink: 0;        }
+        /* New Animation Classes */
+        .option-btn.correct .option-label { background: var(--success); }
+        .option-btn.wrong .option-label { background: var(--danger); }
+        .option-btn.correct { background: rgba(46, 125, 50, 0.1); border-color: var(--success); }
+        .option-btn.wrong { background: rgba(198, 40, 40, 0.1); border-color: var(--danger); }
+        
+        /* Feedback Animation Keyframes */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .anim-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .explanation-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(92, 107, 192, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            font-size: 0.95rem;
+            animation: fadeIn 0.5s;
+        }
+        .explanation-title { font-weight: 700; color: var(--primary); display: block; margin-bottom: 5px; }
+        .nav-controls { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
+        .nav-controls button { flex: 1; min-width: 120px; }
+        .result-card { text-align: center; padding: 30px; background: var(--light); border-radius: 20px; margin: 20px 0; }
+        .score-display { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 15px 0; }
+        .grade-badge {
+            display: inline-block; padding: 8px 24px; border-radius: 50px;
+            font-weight: 700; font-size: 1.2rem; margin: 15px 0;
+            background: var(--gradient); color: white;
+        }
+        .grade-excellence { background: linear-gradient(135deg, #2e7d32, #4caf50); }
+        .grade-better { background: linear-gradient(135deg, #1565c0, #2196f3); }
+        .grade-good { background: linear-gradient(135deg, #6a1b9a, #9c27b0); }
+        .grade-fair { background: linear-gradient(135deg, #ef6c00, #ff9800); }
+
+        .floating-controls {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+        .float-btn {
+            width: 55px; height: 55px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+            background: var(--white);
+            transition: all 0.3s;
+        }
+        .float-btn:hover { transform: scale(1.1); }
+        .sound-toggle.muted::after { content: "🔇"; }
+        .sound-toggle:not(.muted)::after { content: "🔊"; }
+        .theme-toggle::after { content: "🌙"; }
+        [data-theme="dark"] .theme-toggle::after { content: "☀️"; }
+
+        .admin-form { background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0; }
+        .subject-tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+        .subject-tab {
+            padding: 10px 20px; background: var(--white); border: 2px solid var(--accent);
+            border-radius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 500; font-size: 14px; color: var(--dark-text);
+        }
+        .subject-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .question-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-top: 15px; }
+        .question-item { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; color: var(--dark-text); margin-bottom: 5px; }
+        .item-actions { display: flex; gap: 5px; }
+        #countdown-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 14, 39, 0.95); color: white;
+            display: none; justify-content: center; align-items: center;
+            font-size: 120px; font-weight: 800; z-index: 999;
+        }
+
+        .progress-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.9rem; color: #666; }
+
+        .student-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .student-info { flex: 1; }
+        .student-label { font-size: 0.85rem; color: #666; margin-bottom: 4px; }
+        .student-number { font-size: 1.1rem; font-weight: 700; color: var(--primary); word-break: break-all; }
+
+        @media (max-width: 768px) {
+            .container { padding: 1.8rem; margin: 10px; }
+            .exam-header { flex-direction: column; gap: 15px; text-align: center; }
+            .nav-controls { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-controls">
+        <div class="float-btn sound-toggle" id="sound-toggle" title="Toggle Sound"></div>
+        <div class="float-btn theme-toggle" id="theme-toggle" title="Toggle Dark Mode"></div>    </div>
+
+    <div id="countdown-overlay">3</div>
+    <!-- Updated Overlay for Dynamic Text -->
+    <div id="feedback-overlay" class="feedback-overlay"></div>
+
+    <div class="container">
+        <div class="logo">
+            <h1>✨ HighGrade <span>DLI</span> ✨</h1>
+            <p style="color: #666; margin-top: 8px;">University Study & Practice Portal</p>
+        </div>
+        
+        <!-- LOGIN -->
+        <div id="login-section" class="section active">
+            <h2>🔐 Student Login</h2>
+            <p>Enter your Admission Number to access your personalized study portal.</p>
+            <input type="text" id="adm-input" placeholder="Admission Number (e.g., UNI/2024/001)">
+            <button onclick="handleLogin()">🚀 Access Portal</button>
+            <br>
+            <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="admin-section" class="section">
+            <h2>⚙️ Admin Dashboard</h2>
+            
+            <!-- Manage Student Access Section -->
+            <div style="background: var(--light); padding: 25px; border-radius: 16px; margin-bottom: 25px;">
+                <h3>👥 Manage Student Access</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Register admission numbers to grant students access to the portal</p>
+                
+                <input type="hidden" id="edit-adm-index" value="-1">
+                <input type="text" id="new-adm" placeholder="Enter New Admission Number">
+                <button onclick="saveStudent()" style="width: 100%; margin: 10px 0;" id="save-student-btn">✅ Register Number</button>
+                
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: var(--primary);">Registered Students (<span id="student-count">0</span>)</h4>
+                    <div id="student-list-container">
+                        <!-- Student cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Questions Section -->
+            <div style="background: var(--light); padding: 20px; border-radius: 16px;">
+                <h3>📚 Manage Questions</h3>
+                
+                <div class="subject-tabs">
+                    <div class="subject-tab active" data-subject="ecn131">ECN 131</div>
+                    <div class="subject-tab" data-subject="bus120">BUS 120</div>                    <div class="subject-tab" data-subject="bus112">BUS 112</div>
+                    <div class="subject-tab" data-subject="acc121">ACC 121</div>
+                    <div class="subject-tab" data-subject="irp120">IRP 120</div>
+                    <div class="subject-tab" data-subject="ecn141">ECN 141</div>
+                    <div class="subject-tab" data-subject="ns31">NS 31</div>
+                </div>
+
+                <div class="admin-form">
+                    <input type="hidden" id="edit-q-index" value="-1">
+                    <label>📝 Question Text</label>
+                    <textarea id="admin-q-text" placeholder="Enter the question..."></textarea>
+                    
+                    <label>💡 Explanation (Optional)</label>
+                    <textarea id="admin-q-exp" placeholder="Why is the correct answer correct?" style="min-height: 60px;"></textarea>
+
+                    <label>🔤 Options (A, B, C, D)</label>
+                    <input type="text" id="opt-a" placeholder="Option A">
+                    <input type="text" id="opt-b" placeholder="Option B">
+                    <input type="text" id="opt-c" placeholder="Option C">
+                    <input type="text" id="opt-d" placeholder="Option D">
+                    
+                    <label>✅ Correct Answer</label>
+                    <div class="correct-answer-select" style="display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="0" checked> A</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="1"> B</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="2"> C</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="3"> D</label>
+                    </div>
+                    
+                    <button class="gold" onclick="saveQuestion()" id="save-question-btn">💾 Save Question</button>
+                    <button class="secondary" onclick="clearAdminForm()" id="cancel-edit-btn" style="display:none;">❌ Cancel Edit</button>
+                </div>
+                <h4 style="margin: 20px 0 10px;">📋 Existing Questions (<span id="q-count">0</span>)</h4>
+                <div class="question-list" id="questions-list"></div>
+            </div>
+            <br>
+            <button class="secondary" onclick="showSection('login-section')">← Back to Login</button>
+        </div>
+
+        <!-- SUBJECT SELECTION -->
+        <div id="subject-section" class="section">
+            <h2>📚 Select Subject</h2>
+            <p>Welcome back, <strong id="user-display" style="color: var(--primary);"></strong>!</p>
+            
+            <div class="progress-dashboard" id="progress-dashboard">
+                <!-- Injected via JS -->
+            </div>
+
+            <select id="subject-select">
+                <option value="" disabled selected>Choose a Subject to Practice</option>                <option value="ecn131">📊 ECN 131 - Principles of Economics I</option>
+                <option value="bus120">💼 BUS 120 - Introduction to Business</option>
+                <option value="bus112">✉️ BUS 112 - Business Communication</option>
+                <option value="acc121">🧮 ACC 121 - Principles of Accounting I</option>
+                <option value="irp120">🕊️ IRP 120 - Introduction to Peace Studies</option>
+                <option value="ecn141">📈 ECN 141 - Principles of Economics II</option>
+                <option value="ns31">🇳🇬 NS 31 - Nigerian Studies</option>
+            </select>
+            <br>
+            <button onclick="goToModeSelection()">➡️ Choose Exam Mode</button>
+            <button class="secondary" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- MODE SELECTION -->
+        <div id="mode-section" class="section">
+            <h2>🎯 Select Exam Mode</h2>
+            <p><strong>Subject:</strong> <span id="selected-subject-display" style="color: var(--primary); font-weight: 600;"></span></p>
+            
+            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
+                <p style="margin-bottom: 15px;"><strong>💡 Mode Guide:</strong></p>
+                <ul style="text-align: left; padding-left: 20px; margin-bottom: 15px;">
+                    <li><strong>🟢 Beginner:</strong> Total time for all questions. Relax & learn.</li>
+                    <li><strong>🔵 Advance:</strong> Time per question. Moderate challenge.</li>
+                    <li><strong>🔴 Professional:</strong> Strict time per question. JAMB-style pressure + grading.</li>
+                </ul>
+            </div>            
+            <select id="mode-select">
+                <option value="beginner">🟢 Beginner Mode (Total Time)</option>
+                <option value="advance">🔵 Advance Mode (Time Per Question)</option>
+                <option value="professional">🔴 Professional Mode (Strict Time + Grading)</option>
+            </select>
+            <br>
+            <button class="gold" onclick="startExam()">🎬 Start Exam</button>
+            <button class="secondary" onclick="showSection('subject-section')">← Back</button>
+        </div>
+
+        <!-- EXAM INTERFACE -->
+        <div id="exam-section" class="section">
+            <div class="exam-header">
+                <div>
+                    <strong id="subject-badge">Subject</strong><br>
+                    <small id="mode-badge" style="opacity: 0.9;">Mode</small>
+                </div>
+                <div class="timer-container">
+                    <div id="timer-display" style="font-size: 1.4rem; font-weight: 700;">05:00</div>
+                    <div class="timer-bar">
+                        <div class="timer-progress" id="timer-progress"></div>
+                    </div>
+                </div>
+                <div style="text-align: right;">                    <strong id="question-counter">Q: 1/10</strong><br>
+                    <small>Score: <span id="live-score">0</span></small>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <button class="bookmark-btn" id="bookmark-btn" onclick="toggleBookmark()">
+                    🔖 <span id="bookmark-icon">☆</span>
+                </button>
+                <div class="question-text" id="q-text">Loading question...</div>
+                <div class="voice-hint" onclick="speakQuestion(currentQuestions[currentQuestionIndex])" style="display:inline-flex; align-items:center; gap:6px; background:var(--light); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--secondary); margin-top:8px; cursor:pointer;">
+                    🔊 <span>Tap to hear question</span>
+                </div>
+            </div>
+
+            <div class="options-grid" id="options-container"></div>
+
+            <div class="explanation-box" id="explanation-box">
+                <span class="explanation-title">💡 Explanation:</span>
+                <span id="explanation-text"></span>
+            </div>
+
+            <div class="nav-controls">
+                <button class="secondary" id="prev-btn" onclick="prevQuestion()">⬅️ Previous</button>
+                <button id="submit-btn" class="gold" onclick="finishExam(true)" style="display:none;">✅ Submit Exam</button>
+                <button id="next-btn" onclick="nextQuestion()">Next ➡️</button>
+            </div>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="result-section" class="section">
+            <h2>🎉 Exam Completed!</h2>
+            <div class="result-card">
+                <div style="font-size: 1.2rem; color: #666;">Your Final Score</div>
+                <div class="score-display" id="final-score">0/10</div>
+                <div style="font-size: 1.3rem; color: var(--primary); margin-bottom: 10px;">
+                    <span id="percentage">0%</span> Accuracy
+                </div>
+                <div class="grade-badge" id="grade-display">Pending</div>
+                <p id="feedback-msg" style="margin-top: 15px; font-style: italic; color: #555;"></p>
+            </div>
+
+            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
+                <h4 style="margin-bottom: 10px;">📊 Performance Summary</h4>
+                <p><strong>✅ Correct:</strong> <span id="correct-count">0</span></p>
+                <p><strong>❌ Incorrect:</strong> <span id="wrong-count">0</span></p>
+                <p><strong>⏱️ Time Used:</strong> <span id="time-used">00:00</span></p>
+            </div>
+            <button onclick="showSection('subject-section')">🔄 Practice Another Subject</button>
+            <button class="secondary" onclick="logout()">🚪 Logout</button>        </div>
+    </div>
+
+    <script>
+        // ==================== QUESTION BANKS ====================
+        const questionBanks = {
+            ecn131: [
+                { q: "What is the basic economic problem?", options: ["Unlimited resources", "Scarcity", "Inflation", "Taxation"], answer: 1, exp: "Scarcity exists because human wants are unlimited while resources to satisfy them are limited." },
+                { q: "The demand curve typically slopes...", options: ["Upward", "Downward", "Horizontal", "Vertical"], answer: 1, exp: "As price decreases, quantity demanded increases, creating a downward slope." },
+                { q: "Opportunity cost refers to...", options: ["Money spent", "Next best alternative forgone", "Production cost", "Market price"], answer: 1, exp: "It is the value of the next best option you give up when making a choice." },
+                { q: "Which is a factor of production?", options: ["Money", "Land", "Profit", "Demand"], answer: 1, exp: "Land, Labor, Capital, and Entrepreneurship are the four factors of production." },
+                { q: "Law of diminishing returns applies in...", options: ["Short run", "Long run", "Both", "Neither"], answer: 0, exp: "It applies in the short run when at least one factor of production is fixed." }
+            ],
+            bus120: [
+                { q: "The primary goal of most businesses is to...", options: ["Serve community", "Maximize profit", "Employ people", "Pay taxes"], answer: 1, exp: "While businesses serve communities, their primary survival metric is usually profit maximization." },
+                { q: "Which is NOT a type of business ownership?", options: ["Sole proprietorship", "Partnership", "Corporation", "Democracy"], answer: 3, exp: "Democracy is a form of government, not a business ownership structure." },
+                { q: "Marketing mix includes...", options: ["Product, Price, Place, Promotion", "People, Process, Profit", "Plan, Produce, Package", "None"], answer: 0, exp: "The 4 Ps of marketing are Product, Price, Place, and Promotion." },
+                { q: "A business plan is important for...", options: ["Getting loans", "Guiding operations", "Attracting investors", "All of the above"], answer: 3, exp: "A business plan serves all these critical functions for a startup or existing business." },
+                { q: "SWOT analysis stands for...", options: ["Strength, Weakness, Opportunity, Threat", "Sales, Work, Order, Trade", "Strategy, Workflow, Output, Target", "None"], answer: 0, exp: "SWOT helps identify internal strengths/weaknesses and external opportunities/threats." }
+            ],
+            bus112: [
+                { q: "Effective business communication should be...", options: ["Long and detailed", "Clear and concise", "Complex and formal", "Vague and open"], answer: 1, exp: "Clarity and conciseness ensure the message is understood quickly and accurately." },
+                { q: "Which is a barrier to communication?", options: ["Clarity", "Feedback", "Noise", "Listening"], answer: 2, exp: "Noise (physical or psychological) interferes with the transmission of the message." },
+                { q: "The receiver in communication is the...", options: ["Sender", "Message", "Decoder", "Channel"], answer: 2, exp: "The receiver decodes the message sent by the sender." },
+                { q: "Non-verbal communication includes...", options: ["Email", "Body language", "Report", "Memo"], answer: 1, exp: "Body language, facial expressions, and gestures are key forms of non-verbal communication." },
+                { q: "A formal business letter should end with...", options: ["Bye", "Cheers", "Yours faithfully", "See you"], answer: 2, exp: "'Yours faithfully' or 'Yours sincerely' are standard formal closings." }
+            ],
+            acc121: [
+                { q: "The accounting equation is...", options: ["Assets = Liabilities + Equity", "Revenue - Expenses = Profit", "Debit = Credit", "Assets + Liabilities = Equity"], answer: 0, exp: "This equation must always balance in double-entry bookkeeping." },
+                { q: "Which is a current asset?", options: ["Building", "Cash", "Land", "Equipment"], answer: 1, exp: "Cash is liquid and expected to be used within one year, making it a current asset." },
+                { q: "Double-entry bookkeeping means...", options: ["Two accountants", "Every transaction affects two accounts", "Two entries per day", "None"], answer: 1, exp: "Every transaction has a debit entry and a corresponding credit entry." },
+                { q: "A trial balance is prepared to...", options: ["Calculate profit", "Check arithmetic accuracy", "Prepare tax return", "Pay salaries"], answer: 1, exp: "It ensures total debits equal total credits before preparing financial statements." },
+                { q: "Depreciation is charged on...", options: ["Current assets", "Fixed assets", "Liabilities", "Equity"], answer: 1, exp: "Depreciation allocates the cost of tangible fixed assets over their useful life." }
+            ],
+            irp120: [
+                { q: "Peace studies primarily focuses on...", options: ["War strategies", "Conflict resolution", "Weapon development", "Political power"], answer: 1, exp: "It studies the causes of conflict and methods to resolve them peacefully." },
+                { q: "Which is a type of conflict?", options: ["Harmony", "Cooperation", "Interpersonal", "Agreement"], answer: 2, exp: "Interpersonal conflict occurs between individuals." },
+                { q: "Mediation in conflict resolution involves...", options: ["A third party facilitator", "Taking sides", "Ignoring the issue", "Using force"], answer: 0, exp: "A mediator facilitates negotiation but does not impose a solution." },
+                { q: "The United Nations was founded in...", options: ["1919", "1945", "1960", "1990"], answer: 1, exp: "The UN was established after WWII in 1945 to maintain international peace." },
+                { q: "Diplomacy is best described as...", options: ["Military action", "Negotiation between states", "Economic sanctions", "Propaganda"], answer: 1, exp: "Diplomacy is the practice of conducting negotiations between representatives of states." }
+            ],
+            ecn141: [
+                { q: "GDP stands for...", options: ["General Domestic Product", "Gross Domestic Product", "Global Development Plan", "Government Debt Percentage"], answer: 1, exp: "GDP measures the total monetary value of all finished goods and services produced within a country." },
+                { q: "Inflation is a sustained increase in...", options: ["Employment", "General price level", "Interest rates", "Exports"], answer: 1, exp: "Inflation reduces purchasing power as the general price level rises." },
+                { q: "Monetary policy is controlled by...", options: ["Parliament", "Central Bank", "Commercial Banks", "IMF"], answer: 1, exp: "The Central Bank manages money supply and interest rates." },
+                { q: "Fiscal policy involves...", options: ["Interest rates", "Government spending and taxation", "Money supply", "Exchange rates"], answer: 1, exp: "The government uses spending and tax policies to influence the economy." },
+                { q: "Unemployment due to economic downturn is called...", options: ["Frictional", "Structural", "Cyclical", "Seasonal"], answer: 2, exp: "Cyclical unemployment rises during recessions and falls during expansions." }
+            ],
+            ns31: [
+                { q: "Nigeria gained independence in...", options: ["1957", "1960", "1963", "1966"], answer: 1, exp: "Nigeria became independent from Britain on October 1, 1960." },                { q: "The capital of Nigeria is...", options: ["Lagos", "Abuja", "Kano", "Port Harcourt"], answer: 1, exp: "Abuja replaced Lagos as the capital in 1991." },
+                { q: "The Nigerian flag has how many colors?", options: ["One", "Two", "Three", "Four"], answer: 1, exp: "Green-White-Green represents agriculture and peace." },
+                { q: "Citizenship by birth is acquired when...", options: ["You pay for it", "Born to Nigerian parents", "You marry a Nigerian", "You visit Nigeria"], answer: 1, exp: "Section 25 of the Constitution grants citizenship by birth to those born to Nigerian parents." },
+                { q: "The current constitution of Nigeria was adopted in...", options: ["1979", "1999", "2007", "2015"], answer: 1, exp: "The 1999 Constitution marked the return to democratic rule." }
+            ]
+        };
+
+        // ==================== STATE VARIABLES ====================
+        let currentUser = null, currentSubject = '', currentMode = '';
+        let currentQuestions = [], currentQuestionIndex = 0, score = 0;
+        let timerInterval, timeLeft = 0, totalTime = 0, examStartTime = 0;
+        let isSoundEnabled = true;
+        let userAnswers = {};
+        let bookmarks = [];
+        const speechSynthesis = window.speechSynthesis;
+        
+        // Enhanced Voice Messages
+        const positiveMessages = ["Wow!", "Amazing!", "Nice one!", "Good job!", "Excellent!", "Perfect!", "Correct!", "Fantastic!"];
+        const negativeMessages = ["Oh sorry!", "Try again!", "Not quite!", "Incorrect!", "Wrong answer!", "Keep trying!"];
+
+        // ==================== THEME & SOUND TOGGLES ====================
+        const themeToggle = document.getElementById('theme-toggle');
+        const soundToggle = document.getElementById('sound-toggle');
+
+        if (localStorage.getItem('hgdl_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('hgdl_theme', newTheme);
+        });
+
+        soundToggle.addEventListener('click', function() {
+            isSoundEnabled = !isSoundEnabled;
+            this.classList.toggle('muted', !isSoundEnabled);
+            if (isSoundEnabled) speak("Sound enabled"); else speechSynthesis?.cancel();
+        });
+        soundToggle.classList.toggle('muted', !isSoundEnabled);
+
+        // ==================== NAVIGATION ====================
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id !== 'exam-section') clearInterval(timerInterval);
+            if (id === 'subject-section') loadProgressDashboard();
+            if (id === 'admin-section') {
+                loadStudents();                loadAdminQuestions();
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('adm-input').value = '';
+            showSection('login-section');
+        }
+
+        // ==================== STUDENT MANAGEMENT ====================
+        function loadStudents() {
+            const students = JSON.parse(localStorage.getItem('hgdl_students')) || [];
+            const container = document.getElementById('student-list-container');
+            document.getElementById('student-count').textContent = students.length;
+            
+            if (students.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            students.forEach((adm, index) => {
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <div class="student-info">
+                        <div class="student-label">Admission Number</div>
+                        <div class="student-number">${adm}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editStudent(${index})">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteStudent(${index})">🗑️ Delete</button>
+                    </div>
+                `;
+                container.appendChild(studentCard);
+            });
+        }
+
+        function saveStudent() {
+            const input = document.getElementById('new-adm');
+            const editIndex = parseInt(document.getElementById('edit-adm-index').value);
+            const adm = input.value.trim().toUpperCase();
+            
+            if (!adm) { alert("⚠️ Please enter an admission number"); return; }
+            if (!/^[A-Z0-9\/\-_]+$/.test(adm)) { alert("⚠️ Use only letters, numbers, /, -, or _"); return; }
+            
+            let students = JSON.parse(localStorage.getItem('hgdl_students')) || [];            
+            if (editIndex > -1) {
+                students[editIndex] = adm;                clearStudentForm();
+                alert("✅ Student updated!");
+            } else {
+                if (students.includes(adm)) { alert("⚠️ This admission number already exists"); return; }
+                students.push(adm);
+                input.value = '';
+                alert("✅ Student registered successfully!");
+            }
+            
+            localStorage.setItem('hgdl_students', JSON.stringify(students));
+            loadStudents();
+        }
+
+        function deleteStudent(index) {
+            if (!confirm("⚠️ Are you sure you want to remove this student's access?")) return;
+            let students = JSON.parse(localStorage.getItem('hgdl_students')) || [];
+            students.splice(index, 1);
+            localStorage.setItem('hgdl_students', JSON.stringify(students));
+            loadStudents();
+        }
+
+        function editStudent(index) {
+            const students = JSON.parse(localStorage.getItem('hgdl_students')) || [];
+            document.getElementById('new-adm').value = students[index];
+            document.getElementById('edit-adm-index').value = index;
+            document.getElementById('save-student-btn').textContent = "💾 Update Number";
+            document.getElementById('save-student-btn').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearStudentForm() {
+            document.getElementById('new-adm').value = '';
+            document.getElementById('edit-adm-index').value = '-1';
+            document.getElementById('save-student-btn').textContent = "✅ Register Number";
+        }
+
+        // ==================== PROGRESS TRACKING ====================
+        function loadProgressDashboard() {
+            const dashboard = document.getElementById('progress-dashboard');
+            const allData = JSON.parse(localStorage.getItem('hgdl_progress')) || {};
+            const userData = allData[currentUser] || {};
+            
+            let html = '';
+            const subjects = ['ecn131', 'bus120', 'bus112', 'acc121', 'irp120', 'ecn141', 'ns31'];
+            
+            subjects.forEach(sub => {
+                const subData = userData[sub];
+                const attempts = subData ? subData.attempts : 0;
+                const avg = subData ? Math.round(subData.totalScore / attempts) : 0;
+                const last = subData ? new Date(subData.lastDate).toLocaleDateString() : 'Never';
+                                html += `
+                <div class="stat-card">
+                    <div class="stat-label">${sub.toUpperCase()}</div>
+                    <div class="stat-value">${attempts}</div>
+                    <div class="stat-label">Attempts</div>
+                    <div style="margin-top:5px; font-size:0.8rem; color:#666;">Avg: ${avg}% | Last: ${last}</div>
+                </div>`;
+            });
+            dashboard.innerHTML = html;
+        }
+
+        function saveProgress(subject, scorePercent) {
+            const allData = JSON.parse(localStorage.getItem('hgdl_progress')) || {};
+            if (!allData[currentUser]) allData[currentUser] = {};
+            if (!allData[currentUser][subject]) {
+                allData[currentUser][subject] = { attempts: 0, totalScore: 0, lastDate: '' };
+            }
+            
+            const subData = allData[currentUser][subject];
+            subData.attempts += 1;
+            subData.totalScore += scorePercent;
+            subData.lastDate = new Date().toISOString();
+            
+            localStorage.setItem('hgdl_progress', JSON.stringify(allData));
+        }
+
+        // ==================== ADMIN QUESTION MANAGEMENT ====================
+        let currentAdminSubject = 'ecn131';
+
+        document.querySelectorAll('.subject-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentAdminSubject = this.dataset.subject;
+                loadAdminQuestions();
+            });
+        });
+
+        function loadAdminQuestions() {
+            const questions = questionBanks[currentAdminSubject];
+            const container = document.getElementById('questions-list');
+            document.getElementById('q-count').textContent = questions.length;
+            container.innerHTML = '';
+            if (questions.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">No questions added yet</div>';
+                return;
+            }
+            questions.forEach((q, index) => {
+                const correctLetter = String.fromCharCode(65 + q.answer);
+                container.innerHTML += `                <div class="question-item">
+                    <div style="flex:1; margin-right:10px;">
+                        <strong>Q${index + 1}:</strong> ${q.q.substring(0, 50)}...<br>
+                        <small style="color:#666;">✅ ${correctLetter}</small>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editQuestion(${index})">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteQuestion(${index})">🗑️</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function saveQuestion() {
+            const editIndex = parseInt(document.getElementById('edit-q-index').value);
+            const qText = document.getElementById('admin-q-text').value.trim();
+            const qExp = document.getElementById('admin-q-exp').value.trim();
+            const optA = document.getElementById('opt-a').value.trim();
+            const optB = document.getElementById('opt-b').value.trim();
+            const optC = document.getElementById('opt-c').value.trim();
+            const optD = document.getElementById('opt-d').value.trim();
+            const correctAnswer = parseInt(document.querySelector('input[name="correct-answer"]:checked').value);
+            
+            if (!qText || !optA || !optB || !optC || !optD) return alert("⚠️ Please fill in all fields");
+            
+            const newQuestion = { 
+                q: qText, 
+                options: [optA, optB, optC, optD], 
+                answer: correctAnswer,
+                exp: qExp || "No explanation provided."
+            };
+
+            if (editIndex > -1) {
+                questionBanks[currentAdminSubject][editIndex] = newQuestion;
+                clearAdminForm();
+                alert("✅ Question Updated!");
+            } else {
+                questionBanks[currentAdminSubject].push(newQuestion);
+                document.getElementById('admin-q-text').value = '';
+                document.getElementById('admin-q-exp').value = '';
+                document.getElementById('opt-a').value = '';
+                document.getElementById('opt-b').value = '';
+                document.getElementById('opt-c').value = '';
+                document.getElementById('opt-d').value = '';
+                document.querySelector('input[name="correct-answer"][value="0"]').checked = true;
+                alert("✅ Question Added!");
+            }
+            
+            localStorage.setItem('hgdl_questions', JSON.stringify(questionBanks));
+            loadAdminQuestions();        }
+
+        function editQuestion(index) {
+            const q = questionBanks[currentAdminSubject][index];
+            document.getElementById('edit-q-index').value = index;
+            document.getElementById('admin-q-text').value = q.q;
+            document.getElementById('admin-q-exp').value = q.exp;
+            document.getElementById('opt-a').value = q.options[0];
+            document.getElementById('opt-b').value = q.options[1];
+            document.getElementById('opt-c').value = q.options[2];
+            document.getElementById('opt-d').value = q.options[3];
+            
+            const radios = document.getElementsByName('correct-answer');
+            radios[q.answer].checked = true;
+            
+            document.getElementById('save-question-btn').textContent = "💾 Update Question";
+            document.getElementById('cancel-edit-btn').style.display = "inline-block";
+            document.getElementById('admin-q-text').focus();
+        }
+
+        function clearAdminForm() {
+            document.getElementById('edit-q-index').value = "-1";
+            document.getElementById('save-question-btn').textContent = "💾 Save Question";
+            document.getElementById('cancel-edit-btn').style.display = "none";
+            document.getElementById('admin-q-text').value = '';
+            document.getElementById('admin-q-exp').value = '';
+            document.getElementById('opt-a').value = '';
+            document.getElementById('opt-b').value = '';
+            document.getElementById('opt-c').value = '';
+            document.getElementById('opt-d').value = '';
+            document.querySelector('input[name="correct-answer"][value="0"]').checked = true;
+        }
+
+        function deleteQuestion(index) {
+            if (!confirm("⚠️ Delete this question?")) return;
+            questionBanks[currentAdminSubject].splice(index, 1);
+            localStorage.setItem('hgdl_questions', JSON.stringify(questionBanks));
+            loadAdminQuestions();
+        }
+
+        const savedQuestions = localStorage.getItem('hgdl_questions');
+        if (savedQuestions) Object.assign(questionBanks, JSON.parse(savedQuestions));
+
+        // ==================== LOGIN ====================
+        function handleLogin() {
+            const adm = document.getElementById('adm-input').value.trim().toUpperCase();
+            const students = JSON.parse(localStorage.getItem('hgdl_students')) || [];
+            
+            if (students.length === 0) {
+                currentUser = adm;                document.getElementById('user-display').textContent = adm;
+                showSection('subject-section');
+            } else if (students.includes(adm)) {
+                currentUser = adm;
+                document.getElementById('user-display').textContent = adm;
+                showSection('subject-section');
+            } else {
+                alert("❌ Access Denied\n\nAdmission number not registered.\nPlease contact administrator to register your number.");
+            }
+        }
+
+        // ==================== EXAM FLOW ====================
+        function goToModeSelection() {
+            const sub = document.getElementById('subject-select').value;
+            if (!sub) return alert("⚠️ Please select a subject first");
+            currentSubject = sub;
+            const subjectNames = { ecn131: 'ECN 131', bus120: 'BUS 120', bus112: 'BUS 112', acc121: 'ACC 121', irp120: 'IRP 120', ecn141: 'ECN 141', ns31: 'NS 31' };
+            document.getElementById('selected-subject-display').textContent = subjectNames[sub];
+            showSection('mode-section');
+        }
+
+        function startExam() {
+            currentMode = document.getElementById('mode-select').value;
+            currentQuestions = [...questionBanks[currentSubject]].sort(() => Math.random() - 0.5);
+            if (currentQuestions.length > 10) currentQuestions = currentQuestions.slice(0, 10);
+            
+            currentQuestionIndex = 0; 
+            score = 0; 
+            userAnswers = {}; 
+            bookmarks = [];
+            examStartTime = Date.now();
+            
+            if (currentMode === 'beginner') totalTime = 300;
+            else if (currentMode === 'advance') totalTime = currentQuestions.length * 45;
+            else if (currentMode === 'professional') totalTime = currentQuestions.length * 30;            
+            timeLeft = totalTime;
+            
+            document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();
+            document.getElementById('mode-badge').textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode';
+            
+            startTimer();
+            showSection('exam-section');
+            runCountdown(() => { 
+                loadQuestion(0); 
+                speakQuestion(currentQuestions[0]);
+            });
+        }
+
+        function runCountdown(callback) {
+            const overlay = document.getElementById('countdown-overlay');            overlay.style.display = 'flex';
+            let count = 3;
+            overlay.textContent = count;
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) overlay.textContent = count;
+                else { clearInterval(interval); overlay.style.display = 'none'; callback(); }
+            }, 1000);
+        }
+
+        function startTimer() {
+            updateTimerDisplay(); updateTimerBar();
+            timerInterval = setInterval(() => {
+                timeLeft--; updateTimerDisplay(); updateTimerBar();
+                if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(false); }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('timer-display').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerBar() {
+            const progress = document.getElementById('timer-progress');
+            const percentage = (timeLeft / totalTime) * 100;
+            progress.style.width = `${percentage}%`;
+            if (percentage > 60) progress.className = 'timer-progress';
+            else if (percentage > 30) progress.className = 'timer-progress blue';
+            else progress.className = 'timer-progress red';
+        }
+
+        // ==================== BOOKMARKING ====================
+        function toggleBookmark() {
+            const btn = document.getElementById('bookmark-btn');
+            const icon = document.getElementById('bookmark-icon');
+            
+            if (bookmarks.includes(currentQuestionIndex)) {
+                bookmarks = bookmarks.filter(i => i !== currentQuestionIndex);
+                btn.classList.remove('bookmarked');
+                icon.textContent = '☆';
+            } else {
+                bookmarks.push(currentQuestionIndex);
+                btn.classList.add('bookmarked');
+                icon.textContent = '★';
+            }
+        }
+
+        function updateBookmarkIcon() {
+            const btn = document.getElementById('bookmark-btn');            const icon = document.getElementById('bookmark-icon');
+            if (bookmarks.includes(currentQuestionIndex)) {
+                btn.classList.add('bookmarked');
+                icon.textContent = '★';
+            } else {
+                btn.classList.remove('bookmarked');
+                icon.textContent = '☆';
+            }
+        }
+
+        // ==================== TEXT-TO-SPEECH ====================
+        function speak(text) {
+            if (!isSoundEnabled || !speechSynthesis) return;
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9;
+            speechSynthesis.speak(u);
+        }
+
+        function speakQuestion(qData) {
+            if (!isSoundEnabled || !speechSynthesis) return;
+            speechSynthesis.cancel();
+            
+            const questionUtterance = new SpeechSynthesisUtterance(qData.q);
+            questionUtterance.rate = 0.85;
+            
+            questionUtterance.onend = function() {
+                let optionIndex = 0;
+                function speakNextOption() {
+                    if (optionIndex >= qData.options.length) return;
+                    const letter = String.fromCharCode(65 + optionIndex);
+                    const optionText = `Option ${letter}. ${qData.options[optionIndex]}`;
+                    const optionUtterance = new SpeechSynthesisUtterance(optionText);
+                    optionUtterance.rate = 0.85;
+                    optionUtterance.onend = function() {
+                        optionIndex++;
+                        setTimeout(speakNextOption, 400);
+                    };
+                    speechSynthesis.speak(optionUtterance);
+                }
+                speakNextOption();
+            };
+            speechSynthesis.speak(questionUtterance);
+        }
+        function playTone(frequency, duration) {
+            if (!isSoundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();                oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency; oscillator.type = 'sine'; gainNode.gain.value = 0.1;
+                oscillator.start();
+                setTimeout(() => { oscillator.stop(); audioCtx.close(); }, duration * 1000);
+            } catch (e) {}
+        }
+
+        // ==================== FEEDBACK ANIMATION ====================
+        function showFeedbackOverlay(isCorrect) {
+            const overlay = document.getElementById('feedback-overlay');
+            let msg = "";
+            let color = "";
+            
+            // Shuffle messages
+            if (isCorrect) {
+                msg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
+                color = "#2e7d32"; // Green
+                overlay.style.animation = "popIn 0.5s forwards";
+            } else {
+                msg = negativeMessages[Math.floor(Math.random() * negativeMessages.length)];
+                color = "#c62828"; // Red
+                overlay.style.animation = "shake 0.5s forwards";
+            }
+            
+            overlay.textContent = msg;
+            overlay.style.color = color;
+            overlay.style.opacity = "1";
+            overlay.style.transform = "translate(-50%, -50%) scale(1.1)";
+            
+            // Speak the feedback word
+            speak(msg);
+
+            setTimeout(() => {
+                overlay.style.opacity = "0";
+                overlay.style.transform = "translate(-50%, -50%) scale(1)";
+            }, 1500);
+        }
+
+        // ==================== QUESTION RENDERING ====================
+        function loadQuestion(index) {
+            const qData = currentQuestions[index];
+            document.getElementById('q-text').textContent = qData.q;
+            document.getElementById('question-counter').textContent = `Q: ${index + 1}/${currentQuestions.length}`;
+            document.getElementById('live-score').textContent = score;
+            
+            updateBookmarkIcon();
+            document.getElementById('explanation-box').style.display = 'none';
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+                        qData.options.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-label">${letter}</span> ${opt}`;
+                
+                if (userAnswers[index] !== undefined) {
+                    if (i === qData.answer) btn.classList.add('correct');
+                    else if (i === userAnswers[index]) btn.classList.add('wrong');
+                    btn.disabled = true;
+                } else {
+                    btn.onclick = () => handleAnswer(index, i, btn);
+                }
+                container.appendChild(btn);
+            });
+
+            document.getElementById('prev-btn').disabled = (index === 0);
+            
+            // Logic for Next vs Submit Button
+            const isLastQuestion = (index === currentQuestions.length - 1);
+            document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';
+            document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';
+        }
+
+        function handleAnswer(qIndex, optionIndex, btnElement) {
+            const qData = currentQuestions[qIndex], correctIndex = qData.answer;
+            userAnswers[qIndex] = optionIndex;
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            
+            // Disable all buttons immediately
+            buttons.forEach(b => b.disabled = true);
+            
+            // Show visual feedback on buttons
+            if (optionIndex === correctIndex) {
+                btnElement.classList.add('correct', 'anim-pop'); 
+                score++;
+                document.getElementById('live-score').textContent = score; 
+                speakFeedback(true);
+                playTone(880, 0.1); setTimeout(() => playTone(1100, 0.1), 100);
+            } else {
+                btnElement.classList.add('wrong', 'anim-shake');
+                buttons[correctIndex].classList.add('correct'); 
+                speakFeedback(false, correctIndex);
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                playTone(200, 0.2);
+            }            
+            // Show Overlay Animation (Updated to dynamic words)
+            showFeedbackOverlay(optionIndex === correctIndex);
+                        // Show Explanation
+            const expBox = document.getElementById('explanation-box');
+            const expText = document.getElementById('explanation-text');
+            expText.textContent = qData.exp || "No explanation available.";
+            expBox.style.display = 'block';
+
+            // Auto-advance to next question after short delay
+            setTimeout(() => {
+                if (qIndex < currentQuestions.length - 1) { 
+                    nextQuestion(); 
+                    speakQuestion(currentQuestions[currentQuestionIndex]); 
+                }
+            }, 2000); // Short delay to see the feedback
+        }
+
+        function nextQuestion() { 
+            if (currentQuestionIndex < currentQuestions.length - 1) { 
+                currentQuestionIndex++; 
+                loadQuestion(currentQuestionIndex); 
+            } 
+        }        
+        function prevQuestion() { 
+            if (currentQuestionIndex > 0) { 
+                currentQuestionIndex--; 
+                loadQuestion(currentQuestionIndex); 
+            } 
+        }
+
+        // ==================== FINISH EXAM ====================
+        function finishExam(manualSubmit) {
+            clearInterval(timerInterval);
+            const timeUsed = Math.floor((Date.now() - examStartTime) / 1000);
+            const mins = Math.floor(timeUsed / 60), secs = timeUsed % 60;
+            document.getElementById('time-used').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            const total = currentQuestions.length, percentage = Math.round((score / total) * 100);
+            
+            saveProgress(currentSubject, percentage);
+            
+            document.getElementById('final-score').textContent = `${score}/${total}`;
+            document.getElementById('percentage').textContent = `${percentage}%`;
+            document.getElementById('correct-count').textContent = score;
+            document.getElementById('wrong-count').textContent = total - score;
+            
+            let grade = "", msg = "", gradeClass = "";
+            if (currentMode === 'professional') {
+                if (percentage >= 80) { grade = "Excellence"; msg = "🌟 Outstanding! Ready for real exam!"; gradeClass = "grade-excellence"; }
+                else if (percentage >= 70) { grade = "Better"; msg = "👍 Great job! More practice to excel."; gradeClass = "grade-better"; }
+                else if (percentage >= 50) { grade = "Good"; msg = "✅ Passed! Review weak areas."; gradeClass = "grade-good"; }
+                else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }            } else {
+                if (percentage >= 70) { grade = "Excellent"; msg = "🎉 Fantastic work!"; gradeClass = "grade-excellence"; }
+                else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }
+                else { grade = "Needs Practice"; msg = "💪 Don't give up! Try again."; gradeClass = "grade-fair"; }
+            }
+            
+            const gradeEl = document.getElementById('grade-display');
+            gradeEl.textContent = grade; 
+            gradeEl.className = `grade-badge ${gradeClass}`;
+            document.getElementById('feedback-msg').textContent = msg;
+            
+            showSection('result-section');
+            
+            // Speak Result
+            if (isSoundEnabled) {
+                const resultMsg = `Exam completed. Your score is ${score} out of ${total}, which is ${percentage} percent. Your grade is ${grade}.`;
+                speak(resultMsg);
+            }
+        }
+
+        document.addEventListener('click', function initSpeech() {
+            if (speechSynthesis && !speechSynthesis.pending) { 
+                const t = new SpeechSynthesisUtterance(''); 
+                speechSynthesis.speak(t); 
+                speechSynthesis.cancel();             
+            }
+            document.removeEventListener('click', initSpeech);
+        }, { once: true });
+    </script>
+</body>
+</html>

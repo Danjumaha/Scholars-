@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ HighGrade DLI - Cloud Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="floating-controls">
+        <div class="float-btn sound-toggle" id="sound-toggle" title="Toggle Sound"></div>
+        <div class="float-btn theme-toggle" id="theme-toggle" title="Toggle Dark Mode"></div>    
+    </div>
+
+    <div id="countdown-overlay">3</div>
+    <div id="feedback-overlay" class="feedback-overlay"></div>
+
+    <div class="container">
+        <div class="logo">
+            <h1>✨ HighGrade <span>DLI</span> ✨</h1>
+            <p style="color: #666; margin-top: 8px;">University Study & Practice Portal</p>
+        </div>
+        
+        <!-- LOGIN -->
+        <div id="login-section" class="section active">
+            <h2>🔐 Student Login</h2>
+            <p>Enter your Admission Number to access your personalized study portal.</p>
+            <input type="text" id="adm-input" placeholder="Admission Number (e.g., UNI/2024/001)">
+            <button onclick="handleLogin()">🚀 Access Portal</button>
+            <br>
+            <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="admin-section" class="section">
+            <h2>⚙️ Admin Dashboard</h2>
+            
+            <div style="background: var(--light); padding: 25px; border-radius: 16px; margin-bottom: 25px;">
+                <h3>👥 Manage Student Access</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Register admission numbers to grant students access to the portal</p>
+                
+                <input type="hidden" id="edit-adm-index" value="-1">
+                <input type="text" id="new-adm" placeholder="Enter New Admission Number">
+                <button onclick="saveStudent()" style="width: 100%; margin: 10px 0;" id="save-student-btn">✅ Register Number</button>
+                
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: var(--primary);">Registered Students (<span id="student-count">0</span>)</h4>
+                    <div id="student-list-container"></div>
+                </div>
+            </div>
+            <div style="background: var(--light); padding: 20px; border-radius: 16px;">
+                <h3>📚 Manage Questions</h3>
+                
+                <div class="subject-tabs">
+                    <div class="subject-tab active" data-subject="ecn131">ECN 131</div>
+                    <div class="subject-tab" data-subject="bus120">BUS 120</div>                    
+                    <div class="subject-tab" data-subject="bus112">BUS 112</div>
+                    <div class="subject-tab" data-subject="acc121">ACC 121</div>
+                    <div class="subject-tab" data-subject="irp120">IRP 120</div>
+                    <div class="subject-tab" data-subject="ecn141">ECN 141</div>
+                    <div class="subject-tab" data-subject="ns31">NS 31</div>
+                </div>
+
+                <div class="admin-form">
+                    <input type="hidden" id="edit-q-id" value="">
+                    <label>📝 Question Text</label>
+                    <textarea id="admin-q-text" placeholder="Enter the question..."></textarea>
+                    
+                    <label>💡 Explanation (Optional)</label>
+                    <textarea id="admin-q-exp" placeholder="Why is the correct answer correct?" style="min-height: 60px;"></textarea>
+
+                    <label>🔤 Options (A, B, C, D)</label>
+                    <input type="text" id="opt-a" placeholder="Option A">
+                    <input type="text" id="opt-b" placeholder="Option B">
+                    <input type="text" id="opt-c" placeholder="Option C">
+                    <input type="text" id="opt-d" placeholder="Option D">
+                    
+                    <label>✅ Correct Answer</label>
+                    <div class="correct-answer-select" style="display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="0" checked> A</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="1"> B</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="2"> C</label>
+                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="3"> D</label>
+                    </div>
+                    
+                    <button class="gold" onclick="saveQuestion()" id="save-question-btn">💾 Save Question</button>
+                    <button class="secondary" onclick="clearAdminForm()" id="cancel-edit-btn" style="display:none;">❌ Cancel Edit</button>
+                </div>
+                <h4 style="margin: 20px 0 10px;">📋 Existing Questions (<span id="q-count">0</span>)</h4>
+                <div class="question-list" id="questions-list"></div>
+            </div>
+            <br>
+            <button class="secondary" onclick="showSection('login-section')">← Back to Login</button>
+        </div>
+
+        <!-- SUBJECT SELECTION -->
+        <div id="subject-section" class="section">
+            <h2>📚 Select Subject</h2>
+            <p>Welcome back, <strong id="user-display" style="color: var(--primary);"></strong>!</p>            
+            <div class="progress-dashboard" id="progress-dashboard"></div>
+
+            <select id="subject-select">
+                <option value="" disabled selected>Choose a Subject to Practice</option>                
+                <option value="ecn131">📊 ECN 131 - Principles of Economics I</option>
+                <option value="bus120">💼 BUS 120 - Introduction to Business</option>
+                <option value="bus112">✉️ BUS 112 - Business Communication</option>
+                <option value="acc121">🧮 ACC 121 - Principles of Accounting I</option>
+                <option value="irp120">🕊️ IRP 120 - Introduction to Peace Studies</option>
+                <option value="ecn141">📈 ECN 141 - Principles of Economics II</option>
+                <option value="ns31">🇳🇬 NS 31 - Nigerian Studies</option>
+            </select>
+            <br>
+            <button onclick="goToModeSelection()">➡️ Choose Exam Mode</button>
+            <button class="secondary" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- MODE SELECTION -->
+        <div id="mode-section" class="section">
+            <h2>🎯 Select Exam Mode</h2>
+            <p><strong>Subject:</strong> <span id="selected-subject-display" style="color: var(--primary); font-weight: 600;"></span></p>
+            
+            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
+                <p style="margin-bottom: 15px;"><strong>💡 Mode Guide:</strong></p>
+                <ul style="text-align: left; padding-left: 20px; margin-bottom: 15px;">
+                    <li><strong>🟢 Beginner:</strong> Total time for all questions. Relax & learn.</li>
+                    <li><strong>🔵 Advance:</strong> Time per question. Moderate challenge.</li>
+                    <li><strong>🔴 Professional:</strong> Strict time per question. JAMB-style pressure + grading.</li>
+                </ul>
+            </div>            
+            <select id="mode-select">
+                <option value="beginner">🟢 Beginner Mode (Total Time)</option>
+                <option value="advance">🔵 Advance Mode (Time Per Question)</option>
+                <option value="professional">🔴 Professional Mode (Strict Time + Grading)</option>
+            </select>
+            <br>
+            <button class="gold" onclick="startExam()">🎬 Start Exam</button>
+            <button class="secondary" onclick="showSection('subject-section')">← Back</button>
+        </div>
+
+        <!-- EXAM INTERFACE -->
+        <div id="exam-section" class="section">
+            <div class="exam-header">
+                <div>
+                    <strong id="subject-badge">Subject</strong><br>
+                    <small id="mode-badge" style="opacity: 0.9;">Mode</small>
+                </div>
+                <div class="timer-container">
+                    <div id="timer-display" style="font-size: 1.4rem; font-weight: 700;">05:00</div>                    <div class="timer-bar">
+                        <div class="timer-progress" id="timer-progress"></div>
+                    </div>
+                </div>
+                <div style="text-align: right;">                    
+                    <strong id="question-counter">Q: 1/10</strong><br>
+                    <small>Score: <span id="live-score">0</span></small>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <button class="bookmark-btn" id="bookmark-btn" onclick="toggleBookmark()">
+                    🔖 <span id="bookmark-icon">☆</span>
+                </button>
+                <div class="question-text" id="q-text">Loading question...</div>
+                <div class="voice-hint" onclick="speakQuestion(currentQuestions[currentQuestionIndex])" style="display:inline-flex; align-items:center; gap:6px; background:var(--light); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--secondary); margin-top:8px; cursor:pointer;">
+                    🔊 <span>Tap to replay question</span>
+                </div>
+            </div>
+
+            <div class="options-grid" id="options-container"></div>
+
+            <div class="explanation-box" id="explanation-box">
+                <span class="explanation-title">💡 Explanation:</span>
+                <span id="explanation-text"></span>
+            </div>
+
+            <div class="nav-controls">
+                <button class="secondary" id="prev-btn" onclick="prevQuestion()">⬅️ Previous</button>
+                <button id="submit-btn" class="gold" onclick="finishExam(true)" style="display:none;">✅ Submit Exam</button>
+                <button id="next-btn" onclick="nextQuestion()">Next ➡️</button>
+            </div>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="result-section" class="section">
+            <h2>🎉 Exam Completed!</h2>
+            <div class="result-card">
+                <div style="font-size: 1.2rem; color: #666;">Your Final Score</div>
+                <div class="score-display" id="final-score">0/10</div>
+                <div style="font-size: 1.3rem; color: var(--primary); margin-bottom: 10px;">
+                    <span id="percentage">0%</span> Accuracy
+                </div>
+                <div class="grade-badge" id="grade-display">Pending</div>
+                <p id="feedback-msg" style="margin-top: 15px; font-style: italic; color: #555;"></p>
+            </div>
+
+            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
+                <h4 style="margin-bottom: 10px;">📊 Performance Summary</h4>
+                <p><strong>✅ Correct:</strong> <span id="correct-count">0</span></p>                <p><strong>❌ Incorrect:</strong> <span id="wrong-count">0</span></p>
+                <p><strong>⏱️ Time Used:</strong> <span id="time-used">00:00</span></p>
+            </div>
+            <button onclick="showSection('subject-section')">🔄 Practice Another Subject</button>
+            <button class="secondary" onclick="logout()">🚪 Logout</button>        
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
