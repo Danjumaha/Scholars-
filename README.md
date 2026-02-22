@@ -1,2 +1,2 @@
-# Scholars-
+# Scholars
 New
