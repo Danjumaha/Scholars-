@@ -1,0 +1,9 @@
+{
+  "name": "highgradedli",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node config-inject.js",
+    "dev": "npx serve ."
+  }
+}

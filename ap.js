@@ -2,11 +2,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// 🔐 SECURE: Load Firebase config from global window object (injected at build/deploy)
-// This avoids hardcoding secrets in your source code
-const firebaseConfig = window.FIREBASE_CONFIG || {
-    // Fallback values for local development ONLY (never commit real keys!)
-    apiKey: "YOUR_LOCAL_API_KEY",
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAsy4db0dyMuhbonoIYRMzhG-0Sd1hRi70",
     authDomain: "highgradedli.firebaseapp.com",
     databaseURL: "https://highgradedli-default-rtdb.firebaseio.com",
     projectId: "highgradedli",
@@ -47,9 +45,9 @@ if (localStorage.getItem('hgdl_theme') === 'dark') {
 }
 
 themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('hgdl_theme', newTheme);
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);    localStorage.setItem('hgdl_theme', newTheme);
 });
 
 soundToggle.addEventListener('click', function() {
@@ -96,9 +94,9 @@ async function loadStudents() {
         if (students.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';
             return;
-        }        
-        container.innerHTML = '';
-        students.forEach((student) => {
+        }
+        
+        container.innerHTML = '';        students.forEach((student) => {
             const studentCard = document.createElement('div');
             studentCard.className = 'student-card';
             studentCard.innerHTML = `
@@ -145,9 +143,9 @@ window.saveStudent = async function() {
         input.value = '';
         document.getElementById('edit-adm-index').value = '-1';
         document.getElementById('save-student-btn').textContent = "✅ Register Number";
-        alert("✅ Student saved successfully!");        loadStudents();
-    } catch (error) {
-        console.error("❌ Error saving student:", error);
+        alert("✅ Student saved successfully!");
+        loadStudents();
+    } catch (error) {        console.error("❌ Error saving student:", error);
         alert("❌ Error: " + error.message);
     }
 };
@@ -194,9 +192,9 @@ window.handleLogin = async function() {
         }
     } catch (error) {
         console.error("❌ Login error:", error);
-        alert("❌ Connection error: " + error.message);    }
+        alert("❌ Connection error: " + error.message);
+    }
 };
-
 // Progress Tracking
 async function loadProgressDashboard() {
     const dashboard = document.getElementById('progress-dashboard');
@@ -243,9 +241,9 @@ async function saveProgress(subject, scorePercent) {
             totalScore: scorePercent, lastDate: new Date()
         });
     } else {
-        const docId = querySnapshot.docs[0].id;        const oldData = querySnapshot.docs[0].data();
-        await updateDoc(doc(db, "progress", docId), {
-            attempts: oldData.attempts + 1,
+        const docId = querySnapshot.docs[0].id;
+        const oldData = querySnapshot.docs[0].data();
+        await updateDoc(doc(db, "progress", docId), {            attempts: oldData.attempts + 1,
             totalScore: oldData.totalScore + scorePercent,
             lastDate: new Date()
         });
@@ -292,9 +290,9 @@ async function loadAdminQuestions() {
                     <small style="color:#666;">✅ ${correctLetter}</small>
                 </div>
                 <div class="item-actions">
-                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>                    <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
-                </div>
-            </div>`;
+                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
+                </div>            </div>`;
         });
     } catch (error) {
         console.error("Error loading questions:", error);
@@ -341,9 +339,9 @@ window.editQuestion = async function(id) {
     qSnap.forEach(d => { if(d.id === id) targetQ = d.data(); });
     if(!targetQ) return;
 
-    document.getElementById('edit-q-id').value = id;    document.getElementById('admin-q-text').value = targetQ.q;
-    document.getElementById('admin-q-exp').value = targetQ.exp;
-    document.getElementById('opt-a').value = targetQ.options[0];
+    document.getElementById('edit-q-id').value = id;
+    document.getElementById('admin-q-text').value = targetQ.q;
+    document.getElementById('admin-q-exp').value = targetQ.exp;    document.getElementById('opt-a').value = targetQ.options[0];
     document.getElementById('opt-b').value = targetQ.options[1];
     document.getElementById('opt-c').value = targetQ.options[2];
     document.getElementById('opt-d').value = targetQ.options[3];
@@ -390,8 +388,9 @@ window.goToModeSelection = function() {
 };
 
 // Start Exam
-window.startExam = async function() {    currentMode = document.getElementById('mode-select').value;
-    try {
+window.startExam = async function() {
+    currentMode = document.getElementById('mode-select').value;
+        try {
         const q = query(collection(db, "questions"), where("subject", "==", currentSubject));
         const querySnapshot = await getDocs(q);
         
@@ -408,7 +407,7 @@ window.startExam = async function() {    currentMode = document.getElementById('
         
         if (currentMode === 'beginner') totalTime = 300;
         else if (currentMode === 'advance') totalTime = currentQuestions.length * 45;
-        else if (currentMode === 'professional') totalTime = currentQuestions.length * 30;
+        else if (currentMode === 'professional') totalTime = currentQuestions.length * 30;            
         timeLeft = totalTime;
         
         document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();
@@ -427,7 +426,7 @@ window.startExam = async function() {    currentMode = document.getElementById('
 };
 
 function runCountdown(callback) {
-    const overlay = document.getElementById('countdown-overlay');
+    const overlay = document.getElementById('countdown-overlay');            
     overlay.style.display = 'flex';
     let count = 3;
     overlay.textContent = count;
@@ -439,8 +438,8 @@ function runCountdown(callback) {
 }
 
 function startTimer() {
-    updateTimerDisplay(); updateTimerBar();    timerInterval = setInterval(() => {
-        timeLeft--; updateTimerDisplay(); updateTimerBar();
+    updateTimerDisplay(); updateTimerBar();
+    timerInterval = setInterval(() => {        timeLeft--; updateTimerDisplay(); updateTimerBar();
         if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(false); }
     }, 1000);
 }
@@ -474,7 +473,7 @@ window.toggleBookmark = function() {
 };
 
 function updateBookmarkIcon() {
-    const btn = document.getElementById('bookmark-btn');
+    const btn = document.getElementById('bookmark-btn');            
     const icon = document.getElementById('bookmark-icon');
     if (bookmarks.includes(currentQuestionIndex)) {
         btn.classList.add('bookmarked'); icon.textContent = '★';
@@ -488,8 +487,8 @@ function speak(text) {
     if (!isSoundEnabled || !speechSynthesis) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.9;    speechSynthesis.speak(u);
-}
+    u.rate = 0.9;
+    speechSynthesis.speak(u);}
 
 window.speakQuestion = function(qData) {
     if (!isSoundEnabled || !speechSynthesis) return;
@@ -522,7 +521,7 @@ function playTone(frequency, duration) {
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
+        const gainNode = audioCtx.createGain();                
         oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
         oscillator.frequency.value = frequency; oscillator.type = 'sine'; gainNode.gain.value = 0.1;
         oscillator.start();
@@ -537,8 +536,8 @@ function showFeedbackOverlay(isCorrect) {
     
     if (isCorrect) {
         msg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
-        color = "#2e7d32";        overlay.style.animation = "popIn 0.5s forwards";
-    } else {
+        color = "#2e7d32";
+        overlay.style.animation = "popIn 0.5s forwards";    } else {
         msg = negativeMessages[Math.floor(Math.random() * negativeMessages.length)];
         color = "#c62828";
         overlay.style.animation = "shake 0.5s forwards";
@@ -586,7 +585,8 @@ function loadQuestion(index) {
 
     document.getElementById('prev-btn').disabled = (index === 0);
     const isLastQuestion = (index === currentQuestions.length - 1);
-    document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';    document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';
+    document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';
+    document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';    
     if (isSoundEnabled && index === 0) {
         setTimeout(() => speakQuestion(qData), 500);
     }
@@ -600,16 +600,16 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     buttons.forEach(b => b.disabled = true);
     
     if (optionIndex === correctIndex) {
-        btnElement.classList.add('correct', 'anim-pop');
+        btnElement.classList.add('correct', 'anim-pop'); 
         score++;
-        document.getElementById('live-score').textContent = score;
+        document.getElementById('live-score').textContent = score; 
         playTone(880, 0.1); setTimeout(() => playTone(1100, 0.1), 100);
     } else {
         btnElement.classList.add('wrong', 'anim-shake');
-        buttons[correctIndex].classList.add('correct');
+        buttons[correctIndex].classList.add('correct'); 
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         playTone(200, 0.2);
-    }
+    }            
     showFeedbackOverlay(optionIndex === correctIndex);
                 
     const expBox = document.getElementById('explanation-box');
@@ -618,7 +618,7 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     expBox.style.display = 'block';
 
     setTimeout(() => {
-        if (qIndex < currentQuestions.length - 1) {
+        if (qIndex < currentQuestions.length - 1) { 
             currentQuestionIndex++;
             loadQuestion(currentQuestionIndex);
             if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
@@ -626,19 +626,19 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     }, 2000);
 };
 
-window.nextQuestion = function() {
-    if (currentQuestionIndex < currentQuestions.length - 1) {
-        currentQuestionIndex++;
+window.nextQuestion = function() { 
+    if (currentQuestionIndex < currentQuestions.length - 1) { 
+        currentQuestionIndex++; 
         loadQuestion(currentQuestionIndex);
         if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
-    }
+    } 
 };
 
-window.prevQuestion = function() {
-    if (currentQuestionIndex > 0) {        currentQuestionIndex--;
+window.prevQuestion = function() { 
+    if (currentQuestionIndex > 0) {         currentQuestionIndex--; 
         loadQuestion(currentQuestionIndex);
         if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
-    }
+    } 
 };
 
 // Finish Exam
@@ -669,7 +669,7 @@ window.finishExam = function(manualSubmit) {
     }
     
     const gradeEl = document.getElementById('grade-display');
-    gradeEl.textContent = grade;
+    gradeEl.textContent = grade; 
     gradeEl.className = `grade-badge ${gradeClass}`;
     document.getElementById('feedback-msg').textContent = msg;
     
@@ -682,13 +682,14 @@ window.finishExam = function(manualSubmit) {
 
 // Initialize speech on first click
 document.addEventListener('click', function initSpeech() {
-    if (speechSynthesis && !speechSynthesis.pending) {
-        const t = new SpeechSynthesisUtterance('');
-        speechSynthesis.speak(t);        speechSynthesis.cancel();
+    if (speechSynthesis && !speechSynthesis.pending) { 
+        const t = new SpeechSynthesisUtterance(''); 
+        speechSynthesis.speak(t);         speechSynthesis.cancel();             
     }
     document.removeEventListener('click', initSpeech);
 }, { once: true });
 
 // Debug: Log Firebase connection on load
 console.log("🚀 HighGrade DLI App Loaded");
+console.log("📦 Firebase Config:", firebaseConfig);
 console.log("🔥 Firestore DB:", db);
