@@ -1,10 +1,10 @@
-// Firebase imports
+ 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyAsy4db0dyMuhbonoIYRMzhG-0Sd1hRi70",
+// 🔐 SECURE: Load Firebase config from global window object
+const firebaseConfig = window.FIREBASE_CONFIG || {
+    apiKey: "YOUR_LOCAL_API_KEY",
     authDomain: "highgradedli.firebaseapp.com",
     databaseURL: "https://highgradedli-default-rtdb.firebaseio.com",
     projectId: "highgradedli",
@@ -27,12 +27,13 @@ let score = 0;
 let timerInterval;
 let timeLeft = 0;
 let totalTime = 0;
+let timePerQuestion = 0; // Made global so all functions can access it
 let examStartTime = 0;
 let isSoundEnabled = true;
 let userAnswers = {};
 let bookmarks = [];
+let nextQuestionTimeout; // To manage auto-advance delay
 const speechSynthesis = window.speechSynthesis;
-
 const positiveMessages = ["Wow!", "Amazing!", "Nice one!", "Good job!", "Excellent!", "Perfect!", "Correct!", "Fantastic!"];
 const negativeMessages = ["Oh sorry!", "Try again!", "Not quite!", "Incorrect!", "Wrong answer!", "Keep trying!"];
 
@@ -45,15 +46,17 @@ if (localStorage.getItem('hgdl_theme') === 'dark') {
 }
 
 themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const currentTheme = document.documentElement.getAttribute('data-theme');    
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);    localStorage.setItem('hgdl_theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('hgdl_theme', newTheme);
 });
 
 soundToggle.addEventListener('click', function() {
     isSoundEnabled = !isSoundEnabled;
     this.classList.toggle('muted', !isSoundEnabled);
-    if (isSoundEnabled) speak("Sound enabled"); else speechSynthesis?.cancel();
+    if (isSoundEnabled) speak("Sound enabled"); 
+    else speechSynthesis?.cancel();
 });
 soundToggle.classList.toggle('muted', !isSoundEnabled);
 
@@ -61,7 +64,10 @@ soundToggle.classList.toggle('muted', !isSoundEnabled);
 window.showSection = function(id) {
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    if (id !== 'exam-section') clearInterval(timerInterval);
+    if (id !== 'exam-section') {
+        clearInterval(timerInterval);
+        if(nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+    }
     if (id === 'subject-section') loadProgressDashboard();
     if (id === 'admin-section') { 
         loadStudents(); 
@@ -77,8 +83,7 @@ window.logout = function() {
 
 // Student Management
 async function loadStudents() {
-    const container = document.getElementById('student-list-container');
-    container.innerHTML = '<p>Loading...</p>';
+    const container = document.getElementById('student-list-container');    container.innerHTML = '<p>Loading...</p>';
     
     try {
         console.log("🔍 Loading students from Firebase...");
@@ -94,9 +99,9 @@ async function loadStudents() {
         if (students.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';
             return;
-        }
-        
-        container.innerHTML = '';        students.forEach((student) => {
+        }        
+        container.innerHTML = '';
+        students.forEach((student) => {
             const studentCard = document.createElement('div');
             studentCard.className = 'student-card';
             studentCard.innerHTML = `
@@ -127,8 +132,7 @@ window.saveStudent = async function() {
     
     try {
         if (editId === "-1") {
-            console.log("➕ Adding new student:", adm);
-            const q = query(collection(db, "students"), where("adm", "==", adm));
+            console.log("➕ Adding new student:", adm);            const q = query(collection(db, "students"), where("adm", "==", adm));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) { alert("⚠️ This admission number already exists"); return; }
             
@@ -143,9 +147,10 @@ window.saveStudent = async function() {
         input.value = '';
         document.getElementById('edit-adm-index').value = '-1';
         document.getElementById('save-student-btn').textContent = "✅ Register Number";
-        alert("✅ Student saved successfully!");
+        alert("✅ Student saved successfully!");        
         loadStudents();
-    } catch (error) {        console.error("❌ Error saving student:", error);
+    } catch (error) {
+        console.error("❌ Error saving student:", error);
         alert("❌ Error: " + error.message);
     }
 };
@@ -176,8 +181,7 @@ window.handleLogin = async function() {
 
     try {
         console.log("🔐 Attempting login for:", adm);
-        const q = query(collection(db, "students"), where("adm", "==", adm));
-        const querySnapshot = await getDocs(q);
+        const q = query(collection(db, "students"), where("adm", "==", adm));        const querySnapshot = await getDocs(q);
         
         console.log("📊 Query results:", querySnapshot.size);
         
@@ -192,9 +196,10 @@ window.handleLogin = async function() {
         }
     } catch (error) {
         console.error("❌ Login error:", error);
-        alert("❌ Connection error: " + error.message);
+        alert("❌ Connection error: " + error.message);    
     }
 };
+
 // Progress Tracking
 async function loadProgressDashboard() {
     const dashboard = document.getElementById('progress-dashboard');
@@ -225,8 +230,7 @@ async function loadProgressDashboard() {
             </div>`;
         });
         dashboard.innerHTML = html;
-    } catch (error) {
-        console.error("Error loading progress:", error);
+    } catch (error) {        console.error("Error loading progress:", error);
         dashboard.innerHTML = 'Error loading stats.';
     }
 }
@@ -241,9 +245,10 @@ async function saveProgress(subject, scorePercent) {
             totalScore: scorePercent, lastDate: new Date()
         });
     } else {
-        const docId = querySnapshot.docs[0].id;
+        const docId = querySnapshot.docs[0].id;        
         const oldData = querySnapshot.docs[0].data();
-        await updateDoc(doc(db, "progress", docId), {            attempts: oldData.attempts + 1,
+        await updateDoc(doc(db, "progress", docId), {
+            attempts: oldData.attempts + 1,
             totalScore: oldData.totalScore + scorePercent,
             lastDate: new Date()
         });
@@ -274,8 +279,7 @@ async function loadAdminQuestions() {
         querySnapshot.forEach((doc) => questions.push({ id: doc.id, ...doc.data() }));
 
         document.getElementById('q-count').textContent = questions.length;
-        container.innerHTML = '';
-        
+        container.innerHTML = '';        
         if (questions.length === 0) {
             container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">No questions added yet</div>';
             return;
@@ -290,9 +294,10 @@ async function loadAdminQuestions() {
                     <small style="color:#666;">✅ ${correctLetter}</small>
                 </div>
                 <div class="item-actions">
-                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>
+                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>                    
                     <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
-                </div>            </div>`;
+                </div>
+            </div>`;
         });
     } catch (error) {
         console.error("Error loading questions:", error);
@@ -323,8 +328,7 @@ window.saveQuestion = async function() {
             await updateDoc(doc(db, "questions", editId), questionData);
             clearAdminForm(); alert("✅ Question Updated!");
         } else {
-            await addDoc(collection(db, "questions"), questionData);
-            clearAdminForm(); alert("✅ Question Added!");
+            await addDoc(collection(db, "questions"), questionData);            clearAdminForm(); alert("✅ Question Added!");
         }
         loadAdminQuestions();
     } catch (error) {
@@ -339,9 +343,10 @@ window.editQuestion = async function(id) {
     qSnap.forEach(d => { if(d.id === id) targetQ = d.data(); });
     if(!targetQ) return;
 
-    document.getElementById('edit-q-id').value = id;
+    document.getElementById('edit-q-id').value = id;    
     document.getElementById('admin-q-text').value = targetQ.q;
-    document.getElementById('admin-q-exp').value = targetQ.exp;    document.getElementById('opt-a').value = targetQ.options[0];
+    document.getElementById('admin-q-exp').value = targetQ.exp;
+    document.getElementById('opt-a').value = targetQ.options[0];
     document.getElementById('opt-b').value = targetQ.options[1];
     document.getElementById('opt-c').value = targetQ.options[2];
     document.getElementById('opt-d').value = targetQ.options[3];
@@ -372,8 +377,7 @@ window.deleteQuestion = async function(id) {
         await deleteDoc(doc(db, "questions", id));
         loadAdminQuestions();
     } catch (error) {
-        console.error("Error deleting question:", error);
-        alert("Error deleting question.");
+        console.error("Error deleting question:", error);        alert("Error deleting question.");
     }
 };
 
@@ -388,9 +392,9 @@ window.goToModeSelection = function() {
 };
 
 // Start Exam
-window.startExam = async function() {
+window.startExam = async function() {    
     currentMode = document.getElementById('mode-select').value;
-        try {
+    try {
         const q = query(collection(db, "questions"), where("subject", "==", currentSubject));
         const querySnapshot = await getDocs(q);
         
@@ -398,23 +402,35 @@ window.startExam = async function() {
         querySnapshot.forEach((doc) => fetchedQuestions.push(doc.data()));
 
         currentQuestions = fetchedQuestions.sort(() => Math.random() - 0.5);
-        if (currentQuestions.length > 10) currentQuestions = currentQuestions.slice(0, 10);
-        
+
         if(currentQuestions.length === 0) { alert("No questions available for this subject yet!"); return; }
 
-        currentQuestionIndex = 0; score = 0; userAnswers = {}; bookmarks = [];
+        currentQuestionIndex = 0; 
+        score = 0; 
+        userAnswers = {}; 
+        bookmarks = [];
         examStartTime = Date.now();
         
-        if (currentMode === 'beginner') totalTime = 300;
-        else if (currentMode === 'advance') totalTime = currentQuestions.length * 45;
-        else if (currentMode === 'professional') totalTime = currentQuestions.length * 30;            
-        timeLeft = totalTime;
-        
-        document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();
-        document.getElementById('mode-badge').textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode';
+        // Set time per question based on mode
+        if (currentMode === 'beginner') {
+            timePerQuestion = 0;  
+            totalTime = 7200;  
+        } else if (currentMode === 'advance') {
+            timePerQuestion = 45;  
+            totalTime = currentQuestions.length * timePerQuestion;
+        } else if (currentMode === 'professional') {
+            timePerQuestion = 30;  
+            totalTime = currentQuestions.length * timePerQuestion;
+        }
+
+        // Initialize timer state
+        timeLeft = timePerQuestion > 0 ? timePerQuestion : totalTime;
+
+        document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();        document.getElementById('mode-badge').textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode';
         
         startTimer();
         showSection('exam-section');
+        
         runCountdown(() => { 
             loadQuestion(0); 
             if (isSoundEnabled) speakQuestion(currentQuestions[0]);
@@ -426,32 +442,53 @@ window.startExam = async function() {
 };
 
 function runCountdown(callback) {
-    const overlay = document.getElementById('countdown-overlay');            
+    const overlay = document.getElementById('countdown-overlay');
     overlay.style.display = 'flex';
     let count = 3;
     overlay.textContent = count;
     const interval = setInterval(() => {
         count--;
         if (count > 0) overlay.textContent = count;
-        else { clearInterval(interval); overlay.style.display = 'none'; callback(); }
+        else { 
+            clearInterval(interval); 
+            overlay.style.display = 'none'; 
+            callback(); 
+        }
     }, 1000);
 }
 
 function startTimer() {
-    updateTimerDisplay(); updateTimerBar();
-    timerInterval = setInterval(() => {        timeLeft--; updateTimerDisplay(); updateTimerBar();
-        if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(false); }
+    // Clear any existing timer first to prevent duplicates
+    if (timerInterval) clearInterval(timerInterval);
+    
+    updateTimerDisplay(); 
+    updateTimerBar();
+    
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        updateTimerBar();
+        
+        if (timeLeft <= 0) {
+            handleTimeUp();
+        }
     }, 1000);
 }
 
-function updateTimerDisplay() {
-    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+function updateTimerDisplay() {    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
     document.getElementById('timer-display').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 function updateTimerBar() {
     const progress = document.getElementById('timer-progress');
-    const percentage = (timeLeft / totalTime) * 100;
+    // Calculate percentage based on current question time or total time
+    let percentage;
+    if (timePerQuestion > 0) {
+        percentage = (timeLeft / timePerQuestion) * 100;
+    } else {
+        percentage = (timeLeft / totalTime) * 100;
+    }
+    
     progress.style.width = `${percentage}%`;
     if (percentage > 60) progress.className = 'timer-progress';
     else if (percentage > 30) progress.className = 'timer-progress blue';
@@ -473,7 +510,7 @@ window.toggleBookmark = function() {
 };
 
 function updateBookmarkIcon() {
-    const btn = document.getElementById('bookmark-btn');            
+    const btn = document.getElementById('bookmark-btn');
     const icon = document.getElementById('bookmark-icon');
     if (bookmarks.includes(currentQuestionIndex)) {
         btn.classList.add('bookmarked'); icon.textContent = '★';
@@ -487,8 +524,8 @@ function speak(text) {
     if (!isSoundEnabled || !speechSynthesis) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.9;
-    speechSynthesis.speak(u);}
+    u.rate = 0.9;        speechSynthesis.speak(u);
+}
 
 window.speakQuestion = function(qData) {
     if (!isSoundEnabled || !speechSynthesis) return;
@@ -521,7 +558,7 @@ function playTone(frequency, duration) {
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();                
+        const gainNode = audioCtx.createGain();
         oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
         oscillator.frequency.value = frequency; oscillator.type = 'sine'; gainNode.gain.value = 0.1;
         oscillator.start();
@@ -536,34 +573,47 @@ function showFeedbackOverlay(isCorrect) {
     
     if (isCorrect) {
         msg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
-        color = "#2e7d32";
-        overlay.style.animation = "popIn 0.5s forwards";    } else {
+        color = "#2e7d32";                overlay.style.animation = "popIn 0.3s forwards";
+    } else {
         msg = negativeMessages[Math.floor(Math.random() * negativeMessages.length)];
         color = "#c62828";
-        overlay.style.animation = "shake 0.5s forwards";
+        overlay.style.animation = "shake 0.3s forwards";
     }
     
     overlay.textContent = msg;
     overlay.style.color = color;
     overlay.style.opacity = "1";
-    overlay.style.transform = "translate(-50%, -50%) scale(1.1)";
+    overlay.style.transform = "translate( -25%,  -25%) scale(1.1)";
     speak(msg);
-
+  
     setTimeout(() => {
         overlay.style.opacity = "0";
-        overlay.style.transform = "translate(-50%, -50%) scale(1)";
+        overlay.style.transform = "translate( -25%,  -25%) scale(1)";
     }, 1500);
 }
 
 // Question Rendering
 function loadQuestion(index) {
     const qData = currentQuestions[index];
+    
+    // Reset UI State
     document.getElementById('q-text').textContent = qData.q;
     document.getElementById('question-counter').textContent = `Q: ${index + 1}/${currentQuestions.length}`;
     document.getElementById('live-score').textContent = score;
     
+    // Hide explanation initially unless already answered
+    const expBox = document.getElementById('explanation-box');
+    const expText = document.getElementById('explanation-text');
+    
+    if (userAnswers[index] !== undefined) {
+        expBox.style.display = 'block';
+        expText.textContent = currentQuestions[index].exp || "No explanation available.";
+    } else {
+        expBox.style.display = 'none';
+    }
+
     updateBookmarkIcon();
-    document.getElementById('explanation-box').style.display = 'none';
+
     const container = document.getElementById('options-container');
     container.innerHTML = '';
                 
@@ -572,12 +622,13 @@ function loadQuestion(index) {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerHTML = `<span class="option-label">${letter}</span> ${opt}`;
-        
-        if (userAnswers[index] !== undefined) {
+                if (userAnswers[index] !== undefined) {
+            // If already answered, show state but don't allow click
             if (i === qData.answer) btn.classList.add('correct');
             else if (i === userAnswers[index]) btn.classList.add('wrong');
             btn.disabled = true;
         } else {
+            // If not answered, allow click
             btn.onclick = () => handleAnswer(index, i, btn);
         }
         container.appendChild(btn);
@@ -585,65 +636,123 @@ function loadQuestion(index) {
 
     document.getElementById('prev-btn').disabled = (index === 0);
     const isLastQuestion = (index === currentQuestions.length - 1);
-    document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';
-    document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';    
-    if (isSoundEnabled && index === 0) {
+    document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';    
+    document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';
+    
+    // Auto-speak logic: Speak if sound is on AND question hasn't been answered yet
+    // We check userAnswers to avoid re-reading if user navigates back to an answered question
+    if (isSoundEnabled && userAnswers[index] === undefined) {
         setTimeout(() => speakQuestion(qData), 500);
     }
 }
 
+// Handle Answer Submission
 window.handleAnswer = function(qIndex, optionIndex, btnElement) {
-    const qData = currentQuestions[qIndex], correctIndex = qData.answer;
+    if (!currentQuestions || !currentQuestions[qIndex]) return;
+    
+    const qData = currentQuestions[qIndex];
+    const correctIndex = qData.answer;
+    
+    // Save user answer
     userAnswers[qIndex] = optionIndex;
+
+    // Disable all option buttons for THIS question only
+    const currentContainer = btnElement.closest('.question-container') || document.body;
+    const buttons = currentContainer.querySelectorAll('.option-btn');
     
-    const buttons = document.querySelectorAll('.option-btn');
-    buttons.forEach(b => b.disabled = true);
-    
+    buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('anim-pop', 'anim-shake'); 
+    });
+
+    // Handle Correct/Wrong Logic
     if (optionIndex === correctIndex) {
-        btnElement.classList.add('correct', 'anim-pop'); 
+        btnElement.classList.add('correct', 'anim-pop');
         score++;
-        document.getElementById('live-score').textContent = score; 
-        playTone(880, 0.1); setTimeout(() => playTone(1100, 0.1), 100);
+        document.getElementById('live-score').textContent = score;
+        
+        if (isSoundEnabled) {            playTone(880, 0.1); 
+            setTimeout(() => playTone(1100, 0.1), 100);
+        }
     } else {
         btnElement.classList.add('wrong', 'anim-shake');
-        buttons[correctIndex].classList.add('correct'); 
+        
+        if (buttons[correctIndex]) {
+            buttons[correctIndex].classList.add('correct');
+        }
+
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        playTone(200, 0.2);
-    }            
+        
+        if (isSoundEnabled) {
+            playTone(200, 0.2);
+        }
+    }
+
     showFeedbackOverlay(optionIndex === correctIndex);
-                
+
+    // Display Explanation
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
-    expText.textContent = qData.exp || "No explanation available.";
-    expBox.style.display = 'block';
+    
+    if (expBox && expText) {
+        expText.textContent = qData.exp || "No explanation available.";
+        expBox.style.display = 'block';
+    }
 
-    setTimeout(() => {
-        if (qIndex < currentQuestions.length - 1) { 
+    // Prepare Next Question Transition
+    if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+
+    nextQuestionTimeout = setTimeout(() => {
+        if (qIndex < currentQuestions.length - 1) {
             currentQuestionIndex++;
             loadQuestion(currentQuestionIndex);
-            if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+            
+            // Reset Timer for next question if in timed mode
+            if (timePerQuestion > 0) {
+                timeLeft = timePerQuestion;
+                startTimer();
+            }
+        } else {
+            finishExam(false);
         }
-    }, 2000);
+    }, 15000); 
 };
 
+// Manual Navigation
 window.nextQuestion = function() { 
-    if (currentQuestionIndex < currentQuestions.length - 1) { 
+    if (currentQuestionIndex < currentQuestions.length - 1) {         clearInterval(timerInterval);
         currentQuestionIndex++; 
         loadQuestion(currentQuestionIndex);
-        if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+        
+        // Reset timer for next question
+        if (timePerQuestion > 0 && userAnswers[currentQuestionIndex] === undefined) {
+            timeLeft = timePerQuestion;
+            startTimer();
+        }
+        // Note: loadQuestion handles auto-speech
     } 
 };
 
 window.prevQuestion = function() { 
-    if (currentQuestionIndex > 0) {         currentQuestionIndex--; 
+    if (currentQuestionIndex > 0) {
+        clearInterval(timerInterval);
+        currentQuestionIndex--; 
         loadQuestion(currentQuestionIndex);
-        if (isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+        
+        // Don't restart timer for already answered questions
+        if (userAnswers[currentQuestionIndex] === undefined && timePerQuestion > 0) {
+            timeLeft = timePerQuestion;
+            startTimer();
+        }
+        // Note: loadQuestion handles auto-speech
     } 
 };
 
 // Finish Exam
 window.finishExam = function(manualSubmit) {
     clearInterval(timerInterval);
+    if(nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+    
     const timeUsed = Math.floor((Date.now() - examStartTime) / 1000);
     const mins = Math.floor(timeUsed / 60), secs = timeUsed % 60;
     document.getElementById('time-used').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -660,8 +769,7 @@ window.finishExam = function(manualSubmit) {
     if (currentMode === 'professional') {
         if (percentage >= 80) { grade = "Excellence"; msg = "🌟 Outstanding! Ready for real exam!"; gradeClass = "grade-excellence"; }
         else if (percentage >= 70) { grade = "Better"; msg = "👍 Great job! More practice to excel."; gradeClass = "grade-better"; }
-        else if (percentage >= 50) { grade = "Good"; msg = "✅ Passed! Review weak areas."; gradeClass = "grade-good"; }
-        else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }
+        else if (percentage >= 50) { grade = "Good"; msg = "✅ Passed! Review weak areas."; gradeClass = "grade-good"; }        else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }
     } else {
         if (percentage >= 70) { grade = "Excellent"; msg = "🎉 Fantastic work!"; gradeClass = "grade-excellence"; }
         else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }
@@ -669,7 +777,7 @@ window.finishExam = function(manualSubmit) {
     }
     
     const gradeEl = document.getElementById('grade-display');
-    gradeEl.textContent = grade; 
+    gradeEl.textContent = grade;
     gradeEl.className = `grade-badge ${gradeClass}`;
     document.getElementById('feedback-msg').textContent = msg;
     
@@ -682,14 +790,87 @@ window.finishExam = function(manualSubmit) {
 
 // Initialize speech on first click
 document.addEventListener('click', function initSpeech() {
-    if (speechSynthesis && !speechSynthesis.pending) { 
-        const t = new SpeechSynthesisUtterance(''); 
-        speechSynthesis.speak(t);         speechSynthesis.cancel();             
+    if (speechSynthesis && !speechSynthesis.pending) {
+        const t = new SpeechSynthesisUtterance('');
+        speechSynthesis.speak(t);        
+        speechSynthesis.cancel();
     }
     document.removeEventListener('click', initSpeech);
 }, { once: true });
 
-// Debug: Log Firebase connection on load
 console.log("🚀 HighGrade DLI App Loaded");
-console.log("📦 Firebase Config:", firebaseConfig);
 console.log("🔥 Firestore DB:", db);
+
+// Replay current question audio
+window.replayCurrentQuestion = function() {
+    if (currentQuestions.length === 0) return;
+    
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (currentQ && isSoundEnabled) {
+        speakQuestion(currentQ);
+    }
+};
+
+// Handle when time runs out for a question
+function handleTimeUp() {
+    clearInterval(timerInterval);
+    
+    const qData = currentQuestions[currentQuestionIndex];
+    const correctIndex = qData.answer;
+    
+    // Mark as answered (wrong)    userAnswers[currentQuestionIndex] = -1;  
+    
+    // Show correct answer visually
+    const buttons = document.querySelectorAll('.option-btn');
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === correctIndex) {
+            btn.classList.add('correct');
+        }
+    });
+    
+    // Show explanation
+    const expBox = document.getElementById('explanation-box');
+    const expText = document.getElementById('explanation-text');
+    expText.textContent = qData.exp || "No explanation available.";
+    expBox.style.display = 'block';
+    
+    // Play timeout sound
+    if (isSoundEnabled) {
+        playTone(150, 0.3);  
+        speak("Time's up!");
+    }
+    
+    // Move to next question after delay
+    setTimeout(() => {
+        if (currentQuestionIndex < currentQuestions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion(currentQuestionIndex);
+            
+            // Reset timer for next question
+            if (timePerQuestion > 0) {
+                timeLeft = timePerQuestion;
+                startTimer();
+            }
+            // loadQuestion handles auto-speech
+        } else {
+            finishExam(false);
+        }
+    }, 10000);  
+}
+
+
+
+
+
+
+
+
+// Add this to your JavaScript file
+window.openCalculator = function() {
+    // Open calculator in same tab
+    window.location.href = 'cac.html';
+    
+    // OR open in new tab (uncomment if you prefer)
+    // window.open('cac.html', '_blank');
+}
