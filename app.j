@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -26,12 +27,12 @@ let score = 0;
 let timerInterval;
 let timeLeft = 0;
 let totalTime = 0;
-let timePerQuestion = 0; 
+let timePerQuestion = 0; // Made global so all functions can access it
 let examStartTime = 0;
 let isSoundEnabled = true;
 let userAnswers = {};
 let bookmarks = [];
-let nextQuestionTimeout; 
+let nextQuestionTimeout; // To manage auto-advance delay
 const speechSynthesis = window.speechSynthesis;
 const positiveMessages = ["Wow!", "Amazing!", "Nice one!", "Good job!", "Excellent!", "Perfect!", "Correct!", "Fantastic!"];
 const negativeMessages = ["Oh sorry!", "Try again!", "Not quite!", "Incorrect!", "Wrong answer!", "Keep trying!"];
@@ -47,7 +48,8 @@ if (localStorage.getItem('hgdl_theme') === 'dark') {
 themeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');    
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);    localStorage.setItem('hgdl_theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('hgdl_theme', newTheme);
 });
 
 soundToggle.addEventListener('click', function() {
@@ -81,8 +83,7 @@ window.logout = function() {
 
 // Student Management
 async function loadStudents() {
-    const container = document.getElementById('student-list-container');
-    container.innerHTML = '<p>Loading...</p>';
+    const container = document.getElementById('student-list-container');    container.innerHTML = '<p>Loading...</p>';
     
     try {
         console.log("🔍 Loading students from Firebase...");
@@ -96,7 +97,8 @@ async function loadStudents() {
         document.getElementById('student-count').textContent = students.length;
         
         if (students.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';            return;
+            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';
+            return;
         }        
         container.innerHTML = '';
         students.forEach((student) => {
@@ -130,8 +132,7 @@ window.saveStudent = async function() {
     
     try {
         if (editId === "-1") {
-            console.log("➕ Adding new student:", adm);
-            const q = query(collection(db, "students"), where("adm", "==", adm));
+            console.log("➕ Adding new student:", adm);            const q = query(collection(db, "students"), where("adm", "==", adm));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) { alert("⚠️ This admission number already exists"); return; }
             
@@ -145,7 +146,8 @@ window.saveStudent = async function() {
         
         input.value = '';
         document.getElementById('edit-adm-index').value = '-1';
-        document.getElementById('save-student-btn').textContent = "✅ Register Number";        alert("✅ Student saved successfully!");        
+        document.getElementById('save-student-btn').textContent = "✅ Register Number";
+        alert("✅ Student saved successfully!");        
         loadStudents();
     } catch (error) {
         console.error("❌ Error saving student:", error);
@@ -179,8 +181,7 @@ window.handleLogin = async function() {
 
     try {
         console.log("🔐 Attempting login for:", adm);
-        const q = query(collection(db, "students"), where("adm", "==", adm));
-        const querySnapshot = await getDocs(q);
+        const q = query(collection(db, "students"), where("adm", "==", adm));        const querySnapshot = await getDocs(q);
         
         console.log("📊 Query results:", querySnapshot.size);
         
@@ -194,7 +195,8 @@ window.handleLogin = async function() {
             alert("❌ Access Denied\n\nAdmission number not registered.\nPlease contact administrator.");
         }
     } catch (error) {
-        console.error("❌ Login error:", error);        alert("❌ Connection error: " + error.message);    
+        console.error("❌ Login error:", error);
+        alert("❌ Connection error: " + error.message);    
     }
 };
 
@@ -228,8 +230,7 @@ async function loadProgressDashboard() {
             </div>`;
         });
         dashboard.innerHTML = html;
-    } catch (error) {
-        console.error("Error loading progress:", error);
+    } catch (error) {        console.error("Error loading progress:", error);
         dashboard.innerHTML = 'Error loading stats.';
     }
 }
@@ -243,7 +244,8 @@ async function saveProgress(subject, scorePercent) {
             user: currentUser, subject: subject, attempts: 1,
             totalScore: scorePercent, lastDate: new Date()
         });
-    } else {        const docId = querySnapshot.docs[0].id;        
+    } else {
+        const docId = querySnapshot.docs[0].id;        
         const oldData = querySnapshot.docs[0].data();
         await updateDoc(doc(db, "progress", docId), {
             attempts: oldData.attempts + 1,
@@ -292,7 +294,8 @@ async function loadAdminQuestions() {
                     <small style="color:#666;">✅ ${correctLetter}</small>
                 </div>
                 <div class="item-actions">
-                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>                                        <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
+                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>                    
+                    <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
                 </div>
             </div>`;
         });
@@ -325,8 +328,7 @@ window.saveQuestion = async function() {
             await updateDoc(doc(db, "questions", editId), questionData);
             clearAdminForm(); alert("✅ Question Updated!");
         } else {
-            await addDoc(collection(db, "questions"), questionData);
-            clearAdminForm(); alert("✅ Question Added!");
+            await addDoc(collection(db, "questions"), questionData);            clearAdminForm(); alert("✅ Question Added!");
         }
         loadAdminQuestions();
     } catch (error) {
@@ -341,7 +343,8 @@ window.editQuestion = async function(id) {
     qSnap.forEach(d => { if(d.id === id) targetQ = d.data(); });
     if(!targetQ) return;
 
-    document.getElementById('edit-q-id').value = id;        document.getElementById('admin-q-text').value = targetQ.q;
+    document.getElementById('edit-q-id').value = id;    
+    document.getElementById('admin-q-text').value = targetQ.q;
     document.getElementById('admin-q-exp').value = targetQ.exp;
     document.getElementById('opt-a').value = targetQ.options[0];
     document.getElementById('opt-b').value = targetQ.options[1];
@@ -374,8 +377,7 @@ window.deleteQuestion = async function(id) {
         await deleteDoc(doc(db, "questions", id));
         loadAdminQuestions();
     } catch (error) {
-        console.error("Error deleting question:", error);
-        alert("Error deleting question.");
+        console.error("Error deleting question:", error);        alert("Error deleting question.");
     }
 };
 
@@ -390,7 +392,8 @@ window.goToModeSelection = function() {
 };
 
 // Start Exam
-window.startExam = async function() {        currentMode = document.getElementById('mode-select').value;
+window.startExam = async function() {    
+    currentMode = document.getElementById('mode-select').value;
     try {
         const q = query(collection(db, "questions"), where("subject", "==", currentSubject));
         const querySnapshot = await getDocs(q);
@@ -423,8 +426,7 @@ window.startExam = async function() {        currentMode = document.getElementBy
         // Initialize timer state
         timeLeft = timePerQuestion > 0 ? timePerQuestion : totalTime;
 
-        document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();
-        document.getElementById('mode-badge').textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode';
+        document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();        document.getElementById('mode-badge').textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode';
         
         startTimer();
         showSection('exam-section');
@@ -439,7 +441,8 @@ window.startExam = async function() {        currentMode = document.getElementBy
     }
 };
 
-function runCountdown(callback) {    const overlay = document.getElementById('countdown-overlay');
+function runCountdown(callback) {
+    const overlay = document.getElementById('countdown-overlay');
     overlay.style.display = 'flex';
     let count = 3;
     overlay.textContent = count;
@@ -455,6 +458,7 @@ function runCountdown(callback) {    const overlay = document.getElementById('co
 }
 
 function startTimer() {
+    // Clear any existing timer first to prevent duplicates
     if (timerInterval) clearInterval(timerInterval);
     
     updateTimerDisplay(); 
@@ -471,13 +475,13 @@ function startTimer() {
     }, 1000);
 }
 
-function updateTimerDisplay() {
-    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+function updateTimerDisplay() {    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
     document.getElementById('timer-display').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 function updateTimerBar() {
     const progress = document.getElementById('timer-progress');
+    // Calculate percentage based on current question time or total time
     let percentage;
     if (timePerQuestion > 0) {
         percentage = (timeLeft / timePerQuestion) * 100;
@@ -488,7 +492,8 @@ function updateTimerBar() {
     progress.style.width = `${percentage}%`;
     if (percentage > 60) progress.className = 'timer-progress';
     else if (percentage > 30) progress.className = 'timer-progress blue';
-    else progress.className = 'timer-progress red';}
+    else progress.className = 'timer-progress red';
+}
 
 // Bookmarking
 window.toggleBookmark = function() {
@@ -519,8 +524,7 @@ function speak(text) {
     if (!isSoundEnabled || !speechSynthesis) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.9;
-    speechSynthesis.speak(u);
+    u.rate = 0.9;        speechSynthesis.speak(u);
 }
 
 window.speakQuestion = function(qData) {
@@ -537,7 +541,8 @@ window.speakQuestion = function(qData) {
             const letter = String.fromCharCode(65 + optionIndex);
             const optionText = `Option ${letter}. ${qData.options[optionIndex]}`;
             const optionUtterance = new SpeechSynthesisUtterance(optionText);
-            optionUtterance.rate = 0.85;            optionUtterance.onend = function() {
+            optionUtterance.rate = 0.85;
+            optionUtterance.onend = function() {
                 optionIndex++;
                 setTimeout(speakNextOption, 400);
             };
@@ -568,8 +573,7 @@ function showFeedbackOverlay(isCorrect) {
     
     if (isCorrect) {
         msg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
-        color = "#2e7d32";
-        overlay.style.animation = "popIn 0.3s forwards";
+        color = "#2e7d32";                overlay.style.animation = "popIn 0.3s forwards";
     } else {
         msg = negativeMessages[Math.floor(Math.random() * negativeMessages.length)];
         color = "#c62828";
@@ -579,37 +583,31 @@ function showFeedbackOverlay(isCorrect) {
     overlay.textContent = msg;
     overlay.style.color = color;
     overlay.style.opacity = "1";
-    overlay.style.transform = "translate(-25%, -25%) scale(1.1)";
+    overlay.style.transform = "translate( -25%,  -25%) scale(1.1)";
     speak(msg);
   
     setTimeout(() => {
         overlay.style.opacity = "0";
-        overlay.style.transform = "translate(-25%, -25%) scale(1)";
+        overlay.style.transform = "translate( -25%,  -25%) scale(1)";
     }, 1500);
 }
-// Question Rendering (FIXED: Handles timeout state correctly)
+
+// Question Rendering
 function loadQuestion(index) {
     const qData = currentQuestions[index];
     
+    // Reset UI State
     document.getElementById('q-text').textContent = qData.q;
     document.getElementById('question-counter').textContent = `Q: ${index + 1}/${currentQuestions.length}`;
     document.getElementById('live-score').textContent = score;
     
+    // Hide explanation initially unless already answered
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
     
-    // Check if answered (including timeout -1)
     if (userAnswers[index] !== undefined) {
         expBox.style.display = 'block';
-        expText.textContent = qData.exp || "No explanation available.";
-        
-        // If timed out, show specific message
-        if (userAnswers[index] === -1) {
-            const timeoutMsg = document.createElement('div');
-            timeoutMsg.style.cssText = 'color: #c62828; font-weight: bold; margin-bottom: 10px; padding: 10px; background: #ffebee; border-radius: 8px; text-align: center;';
-            timeoutMsg.textContent = '⏰ Time was up for this question';
-            expBox.insertBefore(timeoutMsg, expBox.firstChild);
-        }
+        expText.textContent = currentQuestions[index].exp || "No explanation available.";
     } else {
         expBox.style.display = 'none';
     }
@@ -618,35 +616,19 @@ function loadQuestion(index) {
 
     const container = document.getElementById('options-container');
     container.innerHTML = '';
-    
-    const hasAnswered = userAnswers[index] !== undefined;
-    const userAnswer = userAnswers[index];
-            
+                
     qData.options.forEach((opt, i) => {
         const letter = String.fromCharCode(65 + i);
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerHTML = `<span class="option-label">${letter}</span> ${opt}`;
-        
-        if (hasAnswered) {
-            // Disable buttons if already answered
+                if (userAnswers[index] !== undefined) {
+            // If already answered, show state but don't allow click
+            if (i === qData.answer) btn.classList.add('correct');
+            else if (i === userAnswers[index]) btn.classList.add('wrong');
             btn.disabled = true;
-            btn.style.cursor = 'not-allowed';
-            
-            if (userAnswer === -1) {
-                // Timed out: Only show correct answer
-                if (i === qData.answer) {                    btn.classList.add('correct');
-                    btn.style.background = 'linear-gradient(135deg, #a5d6a7 0%, #81c784 100%)';
-                } else {
-                    btn.style.opacity = '0.6';
-                }
-            } else {
-                // Manually answered: Show correct/wrong
-                if (i === qData.answer) btn.classList.add('correct');
-                else if (i === userAnswer) btn.classList.add('wrong');
-            }
         } else {
-            // Not answered yet
+            // If not answered, allow click
             btn.onclick = () => handleAnswer(index, i, btn);
         }
         container.appendChild(btn);
@@ -657,23 +639,24 @@ function loadQuestion(index) {
     document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'block';    
     document.getElementById('submit-btn').style.display = isLastQuestion ? 'block' : 'none';
     
+    // Auto-speak logic: Speak if sound is on AND question hasn't been answered yet
+    // We check userAnswers to avoid re-reading if user navigates back to an answered question
     if (isSoundEnabled && userAnswers[index] === undefined) {
         setTimeout(() => speakQuestion(qData), 500);
     }
 }
 
-// Handle Answer Submission (FIXED: Cancels speech to prevent stuck animation)
+// Handle Answer Submission
 window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     if (!currentQuestions || !currentQuestions[qIndex]) return;
     
     const qData = currentQuestions[qIndex];
     const correctIndex = qData.answer;
     
-    // FIX: Cancel speech immediately so animation doesn't get stuck
-    speechSynthesis.cancel();
-    
+    // Save user answer
     userAnswers[qIndex] = optionIndex;
 
+    // Disable all option buttons for THIS question only
     const currentContainer = btnElement.closest('.question-container') || document.body;
     const buttons = currentContainer.querySelectorAll('.option-btn');
     
@@ -682,12 +665,13 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
         b.classList.remove('anim-pop', 'anim-shake'); 
     });
 
+    // Handle Correct/Wrong Logic
     if (optionIndex === correctIndex) {
         btnElement.classList.add('correct', 'anim-pop');
-        score++;        document.getElementById('live-score').textContent = score;
+        score++;
+        document.getElementById('live-score').textContent = score;
         
-        if (isSoundEnabled) {
-            playTone(880, 0.1); 
+        if (isSoundEnabled) {            playTone(880, 0.1); 
             setTimeout(() => playTone(1100, 0.1), 100);
         }
     } else {
@@ -706,6 +690,7 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
 
     showFeedbackOverlay(optionIndex === correctIndex);
 
+    // Display Explanation
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
     
@@ -714,6 +699,7 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
         expBox.style.display = 'block';
     }
 
+    // Prepare Next Question Transition
     if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
 
     nextQuestionTimeout = setTimeout(() => {
@@ -721,6 +707,7 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
             currentQuestionIndex++;
             loadQuestion(currentQuestionIndex);
             
+            // Reset Timer for next question if in timed mode
             if (timePerQuestion > 0) {
                 timeLeft = timePerQuestion;
                 startTimer();
@@ -733,14 +720,16 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
 
 // Manual Navigation
 window.nextQuestion = function() { 
-    if (currentQuestionIndex < currentQuestions.length - 1) {        clearInterval(timerInterval);
+    if (currentQuestionIndex < currentQuestions.length - 1) {         clearInterval(timerInterval);
         currentQuestionIndex++; 
         loadQuestion(currentQuestionIndex);
         
+        // Reset timer for next question
         if (timePerQuestion > 0 && userAnswers[currentQuestionIndex] === undefined) {
             timeLeft = timePerQuestion;
             startTimer();
         }
+        // Note: loadQuestion handles auto-speech
     } 
 };
 
@@ -750,10 +739,12 @@ window.prevQuestion = function() {
         currentQuestionIndex--; 
         loadQuestion(currentQuestionIndex);
         
+        // Don't restart timer for already answered questions
         if (userAnswers[currentQuestionIndex] === undefined && timePerQuestion > 0) {
             timeLeft = timePerQuestion;
             startTimer();
         }
+        // Note: loadQuestion handles auto-speech
     } 
 };
 
@@ -778,11 +769,11 @@ window.finishExam = function(manualSubmit) {
     if (currentMode === 'professional') {
         if (percentage >= 80) { grade = "Excellence"; msg = "🌟 Outstanding! Ready for real exam!"; gradeClass = "grade-excellence"; }
         else if (percentage >= 70) { grade = "Better"; msg = "👍 Great job! More practice to excel."; gradeClass = "grade-better"; }
-        else if (percentage >= 50) { grade = "Good"; msg = "✅ Passed! Review weak areas."; gradeClass = "grade-good"; }
-        else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }
+        else if (percentage >= 50) { grade = "Good"; msg = "✅ Passed! Review weak areas."; gradeClass = "grade-good"; }        else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }
     } else {
         if (percentage >= 70) { grade = "Excellent"; msg = "🎉 Fantastic work!"; gradeClass = "grade-excellence"; }
-        else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }        else { grade = "Needs Practice"; msg = "💪 Don't give up! Try again."; gradeClass = "grade-fair"; }
+        else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }
+        else { grade = "Needs Practice"; msg = "💪 Don't give up! Try again."; gradeClass = "grade-fair"; }
     }
     
     const gradeEl = document.getElementById('grade-display');
@@ -820,64 +811,66 @@ window.replayCurrentQuestion = function() {
     }
 };
 
-// Handle when time runs out (FIXED: Saves answer as -1 immediately)
+// Handle when time runs out for a question
 function handleTimeUp() {
     clearInterval(timerInterval);
     
-    // Prevent double triggering
-    if (userAnswers[currentQuestionIndex] !== undefined) {
-        return;
-    }
-
     const qData = currentQuestions[currentQuestionIndex];
     const correctIndex = qData.answer;
-        // CRITICAL FIX: Mark as timed out (-1) immediately so it can't be re-answered
-    userAnswers[currentQuestionIndex] = -1;
     
+    // Mark as answered (wrong)    userAnswers[currentQuestionIndex] = -1;  
+    
+    // Show correct answer visually
     const buttons = document.querySelectorAll('.option-btn');
     buttons.forEach((btn, i) => {
         btn.disabled = true;
-        btn.style.cursor = 'not-allowed';
         if (i === correctIndex) {
             btn.classList.add('correct');
         }
     });
     
+    // Show explanation
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
-    if (expBox && expText) {
-        expText.textContent = qData.exp || "No explanation available.";
-        expBox.style.display = 'block';
-        
-        // Add timeout message
-        const timeoutMsg = document.createElement('div');
-        timeoutMsg.style.cssText = 'color: #c62828; font-weight: bold; margin-bottom: 10px; padding: 10px; background: #ffebee; border-radius: 8px; text-align: center;';
-        timeoutMsg.textContent = '⏰ Time was up for this question';
-        expBox.insertBefore(timeoutMsg, expBox.firstChild);
-    }
+    expText.textContent = qData.exp || "No explanation available.";
+    expBox.style.display = 'block';
     
+    // Play timeout sound
     if (isSoundEnabled) {
         playTone(150, 0.3);  
         speak("Time's up!");
     }
     
-    if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
-
-    nextQuestionTimeout = setTimeout(() => {
+    // Move to next question after delay
+    setTimeout(() => {
         if (currentQuestionIndex < currentQuestions.length - 1) {
             currentQuestionIndex++;
             loadQuestion(currentQuestionIndex);
             
+            // Reset timer for next question
             if (timePerQuestion > 0) {
                 timeLeft = timePerQuestion;
                 startTimer();
             }
+            // loadQuestion handles auto-speech
         } else {
             finishExam(false);
         }
-    }, 8000);
+    }, 10000);  
 }
 
+
+
+
+
+
+
+
+// Add this to your JavaScript file
 window.openCalculator = function() {
+    // Open calculator in same tab
     window.location.href = 'cac.html';
+    
+    // OR open in new tab (uncomment if you prefer)
+    // window.open('cac.html', '_blank');
 }

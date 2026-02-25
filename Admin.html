@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,31 +14,52 @@
 
     <div id="countdown-overlay">3</div>
     <div id="feedback-overlay" class="feedback-overlay"></div>
-
  
- 
+        
 
-             <div class="container">
+
+    <div class="container">
         <div class="logo">
-            <h1>✨ HighGrade <span>DLI</span> ✨ UNILAG✨</h1>
-            <p style="color: #666; margin-top: 8px;">University Study & Practice Portal</p>
+
+        <img src="logo.png" alt="University of Lagos Logo" class="school-logo">
+
+            <h2> DLI Scholar‘s breeding  <br>
+
+        <span class="sparkle">✨</span>
+        <span class="unilag-text">UNILAG</span>
+        <span class="sparkle">✨</span><br>
+
+
+ 
+</h2>
+ 
+        
+ <p style="color: #666; margin-top: 8px;">University Study & Practice Portal</p>
         </div>
 
+
+
  
+
 
         <!-- LOGIN -->
         <div id="login-section" class="section active">
             <h2>🔐 Student Login</h2>
-            <p>Enter your Admission Number to access your personalized study portal.</p>
-            <input type="text" id="adm-input" placeholder="Admission Number (e.g., UNI/2024/001)">
+            <p>Enter your  Matric Number to access your personalized study portal.</p>
+            <input type="text" id="adm-input" placeholder=" Matric Number (  UNI/2026/2027/001)">
             <button onclick="handleLogin()">🚀 Access Portal</button>
             <br>
-            <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>
+ 
+  <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>  
+
         </div>
+
+ 
 
         <!-- ADMIN DASHBOARD -->
         <div id="admin-section" class="section">
             <h2>⚙️ Admin Dashboard</h2>
+
             
             <div style="background: var(--light); padding: 25px; border-radius: 16px; margin-bottom: 25px;">
                 <h3>👥 Manage Student Access</h3>
@@ -163,10 +184,31 @@
             <div class="question-box">
                 <button class="bookmark-btn" id="bookmark-btn" onclick="toggleBookmark()">
                     🔖 <span id="bookmark-icon">☆</span>
-                </button>
-                <div class="question-text" id="q-text">Loading question...</div>
+                </button><br>
+                <!-- Inside your question card, after the bookmark button -->
+<div class="question-tools" style="display: flex; gap: 8px; margin-bottom: 15px;">
+    <!-- Bookmark Button (you already have this) -->
+    <button id="bookmark-btn" class="bookmark-btn" onclick="toggleBookmark()">
+        <span id="bookmark-icon">☆</span>
+    </button>
+    
+    <!-- NEW CALCULATOR BUTTON -->
+    <button class="calculator-link-btn" onclick="openCalculator()" title="Open Calculator">
+        📊 Calculator here
+    </button>
+</div>
+
+
+
+<div class="question-text" id="q-text">Loading question...</div>
                 <div class="voice-hint" onclick="speakQuestion(currentQuestions[currentQuestionIndex])" style="display:inline-flex; align-items:center; gap:6px; background:var(--light); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--secondary); margin-top:8px; cursor:pointer;">
-                    🔊 <span>Tap to replay question</span>
+
+
+ 
+<button class="replay-btn" onclick="replayCurrentQuestion()">
+    🔊 Tap to replay question
+</button>
+
                 </div>
             </div>
 
@@ -181,6 +223,10 @@
                 <button class="secondary" id="prev-btn" onclick="prevQuestion()">⬅️ Previous</button>
                 <button id="submit-btn" class="gold" onclick="finishExam(true)" style="display:none;">✅ Submit Exam</button>
                 <button id="next-btn" onclick="nextQuestion()">Next ➡️</button>
+
+                        <button onclick="showSection('subject-section')">  Quit Exam 📝</button>
+
+
             </div>
         </div>
 
@@ -209,5 +255,8 @@
 
     <!-- Firebase SDK -->
     <script type="module" src="app.js"></script>
+
+ 
+
 </body>
 </html>
