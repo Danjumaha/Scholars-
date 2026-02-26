@@ -1,262 +1,1491 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ HighGrade DLI - Cloud Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <title>✨ HighGrade DLI - UNILAG Portal</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --light: #f3f4f6;
+            --dark: #1a202c;
+            --white: #ffffff;
+            --success: #48bb78;
+            --danger: #f56565;
+            --gold: #ecc94b;
+            --text-primary: #1a237e;
+            --text-secondary: black;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --input-bg: #f7fafc;
+        }
+
+        [data-theme="dark"] {
+            --light: #1a202c;
+            --white: #2d3748;
+            --dark: #f7fafc;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --border-color: #4a5568;
+            --card-bg: #2d3748;
+            --input-bg: #1a202c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow-y: auto;
+            max-height: 95vh;
+            color: var(--text-primary);
+        }
+
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo { text-align: center; margin-bottom: 25px; }
+        .school-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+ 
+        h2, h3, h4 { color: var(--text-primary); }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
+        button.secondary { 
+            background: #cbd5e0; 
+            color: #4a5568; 
+            margin-top: 10px; 
+        }
+        [data-theme="dark"] button.secondary {
+            background: #4a5568;
+            color: #f7fafc;
+        }
+        button.secondary:hover { background: #a0aec0; color: white; }
+        button.gold { background: linear-gradient(135deg, #d69e2e, #ecc94b); color: #744210; }
+
+        .subject-tabs { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .subject-tab {
+            padding: 8px 15px;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: 0.3s;
+            color: var(--text-primary);
+        }
+        .subject-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .topic-manager, .subject-manager { 
+            background: var(--light); 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+        }
+        .topic-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .topic-item {
+            background: var(--card-bg);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .topic-number {
+            background: var(--primary); color: white;            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; margin-right: 8px;
+        }
+        .topic-actions button {
+            width: auto; padding: 4px 8px; margin: 0 2px; font-size: 0.75rem;
+        }
+
+        .exam-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-primary); }
+        .timer-container { text-align: center; }
+        .timer-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .timer-progress { height: 100%; background: var(--success); width: 100%; transition: width 1s linear; }
+        .timer-progress.blue { background: #4299e1; }
+        .timer-progress.red { background: #f56565; }
+
+        .question-box { background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px; color: var(--text-primary); }
+        .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; line-height: 1.5; }
+        
+        .options-grid { display: grid; gap: 10px; }
+        .option-btn {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            text-align: left;
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #ebf4ff; }
+        .option-btn.correct { background: #c6f6d5; border-color: #48bb78; color: #22543d; }
+        .option-btn.wrong { background: #fed7d7; border-color: #f56565; color: #742a2a; }
+        .option-btn.time-up { background: #fed7d7; border-color: #f56565; opacity: 0.6; }
+        .option-label { font-weight: bold; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; }
+
+        .explanation-box {
+            display: none;
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        [data-theme="dark"] .explanation-box {
+            background: #1a365d;            border-left-color: #63b3ed;
+        }
+
+        .floating-controls { 
+            position: fixed; 
+            bottom: 20px; 
+            right: -100px;
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            z-index: 100;
+            animation: slideInRight 0.5s ease forwards;
+        }
+        @keyframes slideInRight {
+            to { right: 20px; }
+        }
+        .float-btn {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #4a5568; font-size: 1.2rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .float-btn:hover { transform: scale(1.1); }
+        .float-btn.muted { color: #f56565; }
+        .sound-toggle:not(.muted)::after { content: '🔊'; }
+        .sound-toggle.muted::after { content: '🔇'; }
+        .theme-toggle::after { content: '🌙'; }
+        [data-theme="dark"] .theme-toggle::after { content: '☀️'; }
+
+        #countdown-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center;
+            font-size: 8rem; color: white; font-weight: bold; z-index: 1000;
+        }
+
+        .progress-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 15px 0; }
+        .stat-card { 
+            background: var(--light); 
+            padding: 10px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-size: 0.8rem;
+            color: var(--text-primary);            border: 1px solid var(--border-color);
+        }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+
+        .result-card { text-align: center; padding: 20px; background: var(--light); border-radius: 15px; margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .score-display { font-size: 3rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        .grade-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; color: white; font-weight: bold; margin-top: 10px; }
+        .grade-excellence { background: #48bb78; }
+        .grade-good { background: #ecc94b; color: #744210; }
+        .grade-fair { background: #f56565; }
+
+        label { color: var(--text-primary); display: block; margin: 10px 0 5px; font-weight: 600; }
+
+        @media (max-width: 400px) {
+            .container { padding: 20px; }
+            .exam-header { flex-direction: column; gap: 10px; text-align: center; }
+        }
+
+        .calc-toggle-btn-large {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calc-toggle-btn-large:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.6);
+        }
+
+        .calc-toggle-btn-large:active {
+            transform: translateY(-1px);
+        }
+
+        .back-btn-calc {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;            cursor: pointer;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+        }
+        .back-btn-calc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
 </head>
 <body>
+
     <div class="floating-controls">
-        <div class="float-btn sound-toggle" id="sound-toggle" title="Toggle Sound"></div>
-        <div class="float-btn theme-toggle" id="theme-toggle" title="Toggle Dark Mode"></div>    
+        <div class="float-btn sound-toggle" id="sound-toggle"></div>
+        <div class="float-btn theme-toggle" id="theme-toggle"></div>
     </div>
 
     <div id="countdown-overlay">3</div>
-    <div id="feedback-overlay" class="feedback-overlay"></div>
- 
-        
-
 
     <div class="container">
         <div class="logo">
-
-        <img src="logo.png" alt="University of Lagos Logo" class="school-logo">
-
-            <h2> DLI Scholar‘s breeding  <br>
-
-        <span class="sparkle">✨</span>
-        <span class="unilag-text">UNILAG</span>
-        <span class="sparkle">✨</span><br>
-
-
- 
-</h2>
- 
-        
- <p style="color: #666; margin-top: 8px;">University Study & Practice Portal</p>
+            <img src="logo.png" alt="UNILAG Logo" class="school-logo" onerror="this.style.display='none'">
+            <h2>DLI Scholar's Breeding<br><span style="color: #ffd700"> ✨  UNILAG ✨ </span></h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">University Study & Practice Portal</p>
         </div>
 
+        <hr style="border: none; height: 1px; background: var(--border-color); margin: 15px 0;">
 
-
- 
-
-
-        <!-- LOGIN -->
+        <!-- LOGIN SECTION -->
         <div id="login-section" class="section active">
             <h2>🔐 Student Login</h2>
-            <p>Enter your  Matric Number to access your personalized study portal.</p>
-            <input type="text" id="adm-input" placeholder=" Matric Number (  UNI/2026/2027/001)">
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">Enter your Matric Number to access your portal.</p>
+            <input type="text" id="adm-input" placeholder="Matric Number (e.g., UNI/2025/1234)">
             <button onclick="handleLogin()">🚀 Access Portal</button>
-            <br>
- 
-  <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>  
-
+            <button class="secondary" onclick="showSection('admin-section')">⚙️ Admin Access</button>
         </div>
-
- 
 
         <!-- ADMIN DASHBOARD -->
         <div id="admin-section" class="section">
             <h2>⚙️ Admin Dashboard</h2>
-
             
-            <div style="background: var(--light); padding: 25px; border-radius: 16px; margin-bottom: 25px;">
-                <h3>👥 Manage Student Access</h3>
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Register admission numbers to grant students access to the portal</p>
-                
-                <input type="hidden" id="edit-adm-index" value="-1">
-                <input type="text" id="new-adm" placeholder="Enter New Admission Number">
-                <button onclick="saveStudent()" style="width: 100%; margin: 10px 0;" id="save-student-btn">✅ Register Number</button>
-                
-                <div style="margin-top: 20px;">
-                    <h4 style="margin-bottom: 15px; color: var(--primary);">Registered Students (<span id="student-count">0</span>)</h4>
-                    <div id="student-list-container"></div>
-                </div>
+            <div class="subject-manager">
+                <h3>📚 Manage Subjects</h3>
+                <input type="hidden" id="edit-subject-id" value="-1">
+                <input type="text" id="new-subject-code" placeholder="Subject Code (e.g., ECN 131)">
+                <input type="text" id="new-subject-name" placeholder="Subject Name (e.g., Introductory Economics)">
+                <button onclick="saveSubject()" id="save-subject-btn" class="gold">✅ Add Subject</button>                <div id="subject-list-container" class="topic-list" style="margin-top: 15px;"></div>
             </div>
-            <div style="background: var(--light); padding: 20px; border-radius: 16px;">
-                <h3>📚 Manage Questions</h3>
-                
-                <div class="subject-tabs">
-                    <div class="subject-tab active" data-subject="ecn131">ECN 131</div>
-                    <div class="subject-tab" data-subject="bus120">BUS 120</div>                    
-                    <div class="subject-tab" data-subject="bus112">BUS 112</div>
-                    <div class="subject-tab" data-subject="acc121">ACC 121</div>
-                    <div class="subject-tab" data-subject="irp120">IRP 120</div>
-                    <div class="subject-tab" data-subject="ecn141">ECN 141</div>
-                    <div class="subject-tab" data-subject="ns31">NS 31</div>
+
+            <div style="background: var(--light); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                <h3>👥 Manage Students</h3>
+                <input type="hidden" id="edit-adm-index" value="-1">
+                <input type="text" id="new-adm" placeholder="Enter Admission Number">
+                <button onclick="saveStudent()" id="save-student-btn">✅ Register Number</button>
+                <div id="student-list-container" style="margin-top: 15px; max-height: 150px; overflow-y: auto;"></div>
+            </div>
+
+            <div class="topic-manager">
+                <h3>📖 Manage Topics</h3>
+                <div class="subject-tabs" id="topic-subject-tabs"></div>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="new-topic-name" placeholder="Topic Name">
+                    <input type="number" id="new-topic-number" placeholder="#" style="width: 60px;">
                 </div>
+                <button onclick="saveTopic()" class="gold" style="margin-top:5px;">➕ Add Topic</button>
+                <input type="hidden" id="edit-topic-id" value="-1">
+                <div id="topic-list-container" class="topic-list"></div>
+            </div>
 
-                <div class="admin-form">
-                    <input type="hidden" id="edit-q-id" value="">
-                    <label>📝 Question Text</label>
-                    <textarea id="admin-q-text" placeholder="Enter the question..."></textarea>
-                    
-                    <label>💡 Explanation (Optional)</label>
-                    <textarea id="admin-q-exp" placeholder="Why is the correct answer correct?" style="min-height: 60px;"></textarea>
+            <div style="background: var(--light); padding: 15px; border-radius: 12px;">
+                <h3>📝 Manage Questions</h3>
+                <div class="subject-tabs" id="q-subject-tabs"></div>
 
-                    <label>🔤 Options (A, B, C, D)</label>
+                <label>📚 Select Topic (Required)</label>
+                <select id="question-topic"><option value="">-- Select Topic First --</option></select>
+
+                <textarea id="admin-q-text" placeholder="Question Text" rows="2"></textarea>
+                <textarea id="admin-q-exp" placeholder="Explanation (Optional)" rows="1"></textarea>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
                     <input type="text" id="opt-a" placeholder="Option A">
                     <input type="text" id="opt-b" placeholder="Option B">
                     <input type="text" id="opt-c" placeholder="Option C">
                     <input type="text" id="opt-d" placeholder="Option D">
-                    
-                    <label>✅ Correct Answer</label>
-                    <div class="correct-answer-select" style="display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
-                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="0" checked> A</label>
-                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="1"> B</label>
-                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="2"> C</label>
-                        <label style="display:flex; align-items:center; gap:5px;"><input type="radio" name="correct-answer" value="3"> D</label>
-                    </div>
-                    
-                    <button class="gold" onclick="saveQuestion()" id="save-question-btn">💾 Save Question</button>
-                    <button class="secondary" onclick="clearAdminForm()" id="cancel-edit-btn" style="display:none;">❌ Cancel Edit</button>
                 </div>
-                <h4 style="margin: 20px 0 10px;">📋 Existing Questions (<span id="q-count">0</span>)</h4>
-                <div class="question-list" id="questions-list"></div>
+
+                <label style="display:block; margin: 10px 0 5px;">✅ Correct Answer</label>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <label><input type="radio" name="correct-answer" value="0" checked> A</label>
+                    <label><input type="radio" name="correct-answer" value="1"> B</label>
+                    <label><input type="radio" name="correct-answer" value="2"> C</label>
+                    <label><input type="radio" name="correct-answer" value="3"> D</label>
+                </div>
+
+                <input type="hidden" id="edit-q-id" value="">
+                <button class="gold" onclick="saveQuestion()" id="save-question-btn">💾 Save Question</button>
+                <button class="secondary" onclick="clearAdminForm()" id="cancel-edit-btn" style="display:none;">❌ Cancel</button>
+                
+                <h4 style="margin: 15px 0 5px;">Existing Questions (<span id="q-count">0</span>)</h4>
+                <div id="questions-list" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
-            <br>
             <button class="secondary" onclick="showSection('login-section')">← Back to Login</button>
         </div>
 
         <!-- SUBJECT SELECTION -->
         <div id="subject-section" class="section">
             <h2>📚 Select Subject</h2>
-            <p>Welcome back, <strong id="user-display" style="color: var(--primary);"></strong>!</p>            
+            <p>Welcome, <strong id="user-display" style="color:var(--primary)"></strong>!</p>
             <div class="progress-dashboard" id="progress-dashboard"></div>
-
+            
             <select id="subject-select">
-                <option value="" disabled selected>Choose a Subject to Practice</option>                
-                <option value="ecn131">📊 ECN 131 - Principles of Economics I</option>
-                <option value="bus120">💼 BUS 120 - Introduction to Business</option>
-                <option value="bus112">✉️ BUS 112 - Business Communication</option>
-                <option value="acc121">🧮 ACC 121 - Principles of Accounting I</option>
-                <option value="irp120">🕊️ IRP 120 - Introduction to Peace Studies</option>
-                <option value="ecn141">📈 ECN 141 - Principles of Economics II</option>
-                <option value="ns31">🇳🇬 NS 31 - Nigerian Studies</option>
+                <option value="" disabled selected>Choose Subject</option>
             </select>
-            <br>
-            <button onclick="goToModeSelection()">➡️ Choose Exam Mode</button>
+            <button onclick="goToTopicSelection()">➡️ Choose Topic</button>
             <button class="secondary" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- TOPIC SELECTION -->
+        <div id="topic-section" class="section">
+            <h2>📖 Select Topic</h2>
+            <p><strong>Subject:</strong> <span id="topic-subject-display"></span></p>
+            
+            <select id="topic-select">
+                <option value="" disabled selected>Select a Topic</option>
+                <option value="all">📖 All Topics (Full Practice)</option>
+            </select>
+            
+            <div id="topic-question-count" style="display:none; text-align:center; margin: 15px 0; background:var(--light); padding:10px; border-radius:8px; color: var(--text-primary);">
+                <strong>📊 Available:</strong> <span id="q-count-display" style="color:var(--primary); font-size:1.2rem;">0</span> Questions
+            </div>
+            
+            <button id="proceed-to-mode-btn" onclick="goToModeSelectionFromTopic()" disabled>➡️ Choose Exam Mode</button>
+            <button class="secondary" onclick="showSection('subject-section')">← Back</button>
         </div>
 
         <!-- MODE SELECTION -->
         <div id="mode-section" class="section">
-            <h2>🎯 Select Exam Mode</h2>
-            <p><strong>Subject:</strong> <span id="selected-subject-display" style="color: var(--primary); font-weight: 600;"></span></p>
+            <h2>🎯 Exam Mode</h2>
+            <p><strong>Topic:</strong> <span id="selected-topic-display"></span></p>
             
-            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
-                <p style="margin-bottom: 15px;"><strong>💡 Mode Guide:</strong></p>
-                <ul style="text-align: left; padding-left: 20px; margin-bottom: 15px;">
-                    <li><strong>🟢 Beginner:</strong> Total time for all questions. Relax & learn.</li>
-                    <li><strong>🔵 Advance:</strong> Time per question. Moderate challenge.</li>
-                    <li><strong>🔴 Professional:</strong> Strict time per question. JAMB-style pressure + grading.</li>
-                </ul>
-            </div>            
             <select id="mode-select">
-                <option value="beginner">🟢 Beginner Mode (Total Time)</option>
-                <option value="advance">🔵 Advance Mode (Time Per Question)</option>
-                <option value="professional">🔴 Professional Mode (Strict Time + Grading)</option>
-            </select>
-            <br>
+                <option value="beginner">🟢 Beginner (Relaxed Time)</option>
+                <option value="advance">🔵 Advance (Time per Question)</option>
+                <option value="professional">🔴 Professional (Strict JAMB Style)</option>
+            </select>            
             <button class="gold" onclick="startExam()">🎬 Start Exam</button>
-            <button class="secondary" onclick="showSection('subject-section')">← Back</button>
+            <button class="secondary" onclick="showSection('topic-section')">← Back</button>
         </div>
 
         <!-- EXAM INTERFACE -->
         <div id="exam-section" class="section">
             <div class="exam-header">
-                <div>
-                    <strong id="subject-badge">Subject</strong><br>
-                    <small id="mode-badge" style="opacity: 0.9;">Mode</small>
-                </div>
+                <div><strong id="subject-badge">SUBJ</strong><br><small id="mode-badge">Mode</small></div>
                 <div class="timer-container">
-                    <div id="timer-display" style="font-size: 1.4rem; font-weight: 700;">05:00</div>                    <div class="timer-bar">
-                        <div class="timer-progress" id="timer-progress"></div>
-                    </div>
+                    <div id="timer-display" style="font-weight:bold; font-size:1.2rem;">05:00</div>
+                    <div class="timer-bar"><div class="timer-progress" id="timer-progress"></div></div>
                 </div>
-                <div style="text-align: right;">                    
+                <div style="text-align:right;">
                     <strong id="question-counter">Q: 1/10</strong><br>
                     <small>Score: <span id="live-score">0</span></small>
                 </div>
             </div>
 
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="calc-toggle-btn-large" onclick="openCalculator()">
+                    <span style="font-size: 1.5rem;">📊</span> Calculator
+                </button>
+            </div>
+
             <div class="question-box">
-                <button class="bookmark-btn" id="bookmark-btn" onclick="toggleBookmark()">
-                    🔖 <span id="bookmark-icon">☆</span>
-                </button><br>
-                <!-- Inside your question card, after the bookmark button -->
-<div class="question-tools" style="display: flex; gap: 8px; margin-bottom: 15px;">
-    <!-- Bookmark Button (you already have this) -->
-    <button id="bookmark-btn" class="bookmark-btn" onclick="toggleBookmark()">
-        <span id="bookmark-icon">☆</span>
-    </button>
-    
-    <!-- NEW CALCULATOR BUTTON -->
-    <button class="calculator-link-btn" onclick="openCalculator()" title="Open Calculator">
-        📊 Calculator here
-    </button>
-</div>
-
-
-
-<div class="question-text" id="q-text">Loading question...</div>
-                <div class="voice-hint" onclick="speakQuestion(currentQuestions[currentQuestionIndex])" style="display:inline-flex; align-items:center; gap:6px; background:var(--light); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--secondary); margin-top:8px; cursor:pointer;">
-
-
- 
-<button class="replay-btn" onclick="replayCurrentQuestion()">
-    🔊 Tap to replay question
-</button>
-
-                </div>
+                <div class="question-text" id="q-text">Loading...</div>
+                <div class="voice-hint" onclick="replayCurrentQuestion()" style="font-size:0.8rem; color:var(--primary); cursor:pointer; margin-top:10px;">🔊 Replay Audio</div>
             </div>
 
             <div class="options-grid" id="options-container"></div>
 
             <div class="explanation-box" id="explanation-box">
-                <span class="explanation-title">💡 Explanation:</span>
-                <span id="explanation-text"></span>
+                <strong>💡 Explanation:</strong> <span id="explanation-text"></span>
             </div>
-
-            <div class="nav-controls">
-                <button class="secondary" id="prev-btn" onclick="prevQuestion()">⬅️ Previous</button>
-                <button id="submit-btn" class="gold" onclick="finishExam(true)" style="display:none;">✅ Submit Exam</button>
-                <button id="next-btn" onclick="nextQuestion()">Next ➡️</button>
-
-                        <button onclick="showSection('subject-section')">  Quit Exam 📝</button>
-
-
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="secondary" id="prev-btn" onclick="prevQuestion()" style="flex:1">⬅️ Prev</button>
+                <button id="next-btn" onclick="nextQuestion()" style="flex:1">Next ➡️</button>
+                <button id="submit-btn" class="gold" onclick="finishExam(true)" style="flex:1; display:none;">✅ Submit</button>
             </div>
+            <button class="secondary" onclick="showSection('subject-section')" style="margin-top:10px; font-size:0.8rem;">Quit Exam</button>
         </div>
 
         <!-- RESULT SECTION -->
         <div id="result-section" class="section">
             <h2>🎉 Exam Completed!</h2>
             <div class="result-card">
-                <div style="font-size: 1.2rem; color: #666;">Your Final Score</div>
+                <div>Your Score</div>
                 <div class="score-display" id="final-score">0/10</div>
-                <div style="font-size: 1.3rem; color: var(--primary); margin-bottom: 10px;">
-                    <span id="percentage">0%</span> Accuracy
-                </div>
-                <div class="grade-badge" id="grade-display">Pending</div>
-                <p id="feedback-msg" style="margin-top: 15px; font-style: italic; color: #555;"></p>
+                <div style="font-size:1.2rem; color:var(--primary);" id="percentage">0%</div>                <div class="grade-badge" id="grade-display">Pending</div>
+                <p id="feedback-msg" style="margin-top:10px; font-style:italic;"></p>
             </div>
-
-            <div style="background: var(--light); padding: 20px; border-radius: 16px; margin: 20px 0;">
-                <h4 style="margin-bottom: 10px;">📊 Performance Summary</h4>
-                <p><strong>✅ Correct:</strong> <span id="correct-count">0</span></p>                <p><strong>❌ Incorrect:</strong> <span id="wrong-count">0</span></p>
-                <p><strong>⏱️ Time Used:</strong> <span id="time-used">00:00</span></p>
+            <div style="background:var(--light); padding:15px; border-radius:10px; margin-bottom:15px; font-size:0.9rem; color: var(--text-primary);">
+                <p>✅ Correct: <span id="correct-count">0</span></p>
+                <p>❌ Wrong: <span id="wrong-count">0</span></p>
+                <p>⏱️ Time: <span id="time-used">00:00</span></p>
             </div>
-            <button onclick="showSection('subject-section')">🔄 Practice Another Subject</button>
-            <button class="secondary" onclick="logout()">🚪 Logout</button>        
+            <button onclick="showSection('subject-section')">🔄 Practice Another</button>
+            <button class="secondary" onclick="logout()">🚪 Logout</button>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module" src="app.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
- 
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "highgradedli.firebaseapp.com",
+            projectId: "highgradedli",
+            storageBucket: "highgradedli.firebasestorage.app",
+            messagingSenderId: "646678404662",
+            appId: "1:646678404662:web:64994e29c1f8901e7d8297"
+        };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Global state variables
+        let currentUser = null;
+        let currentSubject = '';
+        let currentTopic = '';
+        let currentMode = '';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 0;
+        let totalTime = 0;
+        let timePerQuestion = 0;
+        let examStartTime = 0;
+        let isSoundEnabled = true;
+        let userAnswers = {};
+        let nextQuestionTimeout = null;
+        let autoAdvanceDelay = 5000;
+        const speechSynthesis = window.speechSynthesis;
+        let currentAdminSubject = '';
+        let currentTopicSubject = '';
+        let subjects = [];
+        // ✅ FIX: Load subjects on page load for both student and admin
+        async function initializeSubjects() {
+            try {
+                const snap = await getDocs(collection(db, "subjects"));
+                subjects = [];
+                snap.forEach(d => subjects.push({id: d.id, ...d.data()}));
+                subjects.sort((a,b) => a.code.localeCompare(b.code));
+                updateSubjectTabs();
+                console.log('✅ Subjects loaded:', subjects.length);
+            } catch(e) {
+                console.error('Error loading subjects:', e);
+            }
+        }
+
+        // Make functions globally accessible
+        window.handleLogin = async function() {
+            const adm = document.getElementById('adm-input').value.trim().toUpperCase();
+            if(!adm) return alert("Enter Matric No");
+            
+            try {
+                const snap = await getDocs(query(collection(db, "students"), where("adm", "==", adm)));
+                if(!snap.empty) {
+                    currentUser = adm;
+                    document.getElementById('user-display').textContent = adm;
+                    await loadSubjectsForStudent(); // ✅ Ensure subjects are loaded
+                    showSection('subject-section');
+                } else {
+                    alert("Access Denied. Contact Admin.");
+                }
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        window.showSection = async function(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            if (id !== 'exam-section') {
+                clearInterval(timerInterval);
+                if(nextQuestionTimeout) {
+                    clearTimeout(nextQuestionTimeout);
+                    nextQuestionTimeout = null;
+                }
+            }
+            if (id === 'subject-section') {
+                await loadProgressDashboard();
+                await loadSubjectsForStudent();
+            }
+            if (id === 'admin-section') {
+                await loadStudents();                await loadSubjects();
+                loadAdminQuestions();
+            }
+        };
+
+        window.logout = function() {
+            currentUser = null;
+            document.getElementById('adm-input').value = '';
+            showSection('login-section');
+        };
+
+        // SUBJECT MANAGEMENT
+        async function loadSubjects() {
+            const container = document.getElementById('subject-list-container');
+            if(!container) return;
+            container.innerHTML = '<p>Loading...</p>';
+            try {
+                const snap = await getDocs(collection(db, "subjects"));
+                subjects = [];
+                snap.forEach(d => subjects.push({id: d.id, ...d.data()}));
+                subjects.sort((a,b) => a.code.localeCompare(b.code));
+                
+                if(subjects.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">No subjects yet. Add some!</p>';
+                    updateSubjectTabs();
+                    return;
+                }
+                
+                container.innerHTML = '';
+                subjects.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'topic-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${s.code}</strong><br>
+                            <small style="color:var(--text-secondary)">${s.name}</small>
+                        </div>
+                        <div class="topic-actions">
+                            <button class="secondary" onclick="editSubject('${s.id}', '${s.code}', '${s.name}')">✏️</button>
+                            <button class="secondary" style="background:#f56565;color:white" onclick="deleteSubject('${s.id}')">🗑️</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                updateSubjectTabs();
+            } catch(e) { console.error(e); container.innerHTML = 'Error loading subjects'; }
+        }
+
+        window.saveSubject = async function() {
+            const code = document.getElementById('new-subject-code').value.trim().toUpperCase();            const name = document.getElementById('new-subject-name').value.trim();
+            const editId = document.getElementById('edit-subject-id').value;
+            
+            if(!code || !name) return alert("Fill all fields");
+
+            try {
+                const data = { code, name };
+                if(editId === "-1") {
+                    const q = query(collection(db, "subjects"), where("code", "==", code));
+                    if(!(await getDocs(q)).empty) return alert("Subject code already exists");
+                    await addDoc(collection(db, "subjects"), data);
+                } else {
+                    await updateDoc(doc(db, "subjects", editId), data);
+                }
+                
+                document.getElementById('new-subject-code').value = '';
+                document.getElementById('new-subject-name').value = '';
+                document.getElementById('edit-subject-id').value = '-1';
+                document.getElementById('save-subject-btn').textContent = '✅ Add Subject';
+                await loadSubjects();
+                alert("Subject Saved!");
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        window.editSubject = function(id, code, name) {
+            document.getElementById('new-subject-code').value = code;
+            document.getElementById('new-subject-name').value = name;
+            document.getElementById('edit-subject-id').value = id;
+            document.getElementById('save-subject-btn').textContent = "💾 Update Subject";
+        };
+
+        window.deleteSubject = async function(id) {
+            if(!confirm("Delete subject? This will also delete all topics and questions for this subject!")) return;
+            await deleteDoc(doc(db, "subjects", id));
+            
+            const topicsSnap = await getDocs(query(collection(db, "topics"), where("subject", "==", id)));
+            topicsSnap.forEach(async t => {
+                await deleteDoc(doc(db, "topics", t.id));
+                const qSnap = await getDocs(query(collection(db, "questions"), where("topic", "==", t.id)));
+                qSnap.forEach(async q => await deleteDoc(doc(db, "questions", q.id)));
+            });
+            
+            await loadSubjects();
+        };
+
+        function updateSubjectTabs() {
+            const topicTabs = document.getElementById('topic-subject-tabs');
+            const qTabs = document.getElementById('q-subject-tabs');
+            
+            if(!topicTabs || !qTabs) return;            
+            topicTabs.innerHTML = '';
+            qTabs.innerHTML = '';
+            
+            subjects.forEach((s, index) => {
+                const tab1 = document.createElement('div');
+                tab1.className = 'subject-tab' + (index === 0 ? ' active' : '');
+                tab1.dataset.subject = s.id;
+                tab1.textContent = s.code;
+                tab1.onclick = function() {
+                    topicTabs.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTopicSubject = this.dataset.subject;
+                    loadTopicsForSubject(currentTopicSubject);
+                };
+                topicTabs.appendChild(tab1);
+                
+                const tab2 = document.createElement('div');
+                tab2.className = 'subject-tab' + (index === 0 ? ' active' : '');
+                tab2.dataset.subject = s.id;
+                tab2.textContent = s.code;
+                tab2.onclick = function() {
+                    qTabs.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentAdminSubject = this.dataset.subject;
+                    loadAdminQuestions();
+                    loadTopicsForSubject(currentAdminSubject);
+                };
+                qTabs.appendChild(tab2);
+            });
+            
+            if(subjects.length > 0) {
+                currentTopicSubject = subjects[0].id;
+                currentAdminSubject = subjects[0].id;
+                loadTopicsForSubject(currentTopicSubject);
+            }
+        }
+
+        async function loadSubjectsForStudent() {
+            const select = document.getElementById('subject-select');
+            if(!select) return;
+            select.innerHTML = '<option value="" disabled selected>Choose Subject</option>';
+            
+            // ✅ Ensure subjects are loaded first
+            if(subjects.length === 0) {
+                await initializeSubjects();
+            }
+            
+            subjects.forEach(s => {
+                const opt = document.createElement('option');                opt.value = s.id;
+                opt.textContent = `📊 ${s.code} - ${s.name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        async function loadStudents() {
+            const container = document.getElementById('student-list-container');
+            if(!container) return;
+            container.innerHTML = '<p>Loading...</p>';
+            try {
+                const snap = await getDocs(collection(db, "students"));
+                const students = [];
+                snap.forEach(d => students.push({id: d.id, ...d.data()}));                
+                if(students.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">No students yet</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                students.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'topic-item';
+                    div.innerHTML = `
+                        <span>${s.adm}</span>
+                        <div class="topic-actions">
+                            <button class="secondary" onclick="editStudent('${s.id}', '${s.adm}')">✏️</button>
+                            <button class="secondary" style="background:#f56565;color:white" onclick="deleteStudent('${s.id}')">🗑️</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) { console.error(e); container.innerHTML = 'Error loading students'; }
+        }
+
+        window.saveStudent = async function() {
+            const input = document.getElementById('new-adm');
+            const editId = document.getElementById('edit-adm-index').value;
+            const adm = input.value.trim().toUpperCase();
+            if(!adm) return alert("Enter admission number");
+
+            try {
+                if(editId === "-1") {
+                    const q = query(collection(db, "students"), where("adm", "==", adm));
+                    if(!(await getDocs(q)).empty) return alert("Already exists");
+                    await addDoc(collection(db, "students"), { adm });
+                } else {
+                    await updateDoc(doc(db, "students", editId), { adm });
+                }
+                input.value = '';
+                document.getElementById('edit-adm-index').value = '-1';                await loadStudents();
+                alert("Saved!");
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        window.editStudent = function(id, adm) {
+            document.getElementById('new-adm').value = adm;
+            document.getElementById('edit-adm-index').value = id;
+            document.getElementById('save-student-btn').textContent = "💾 Update";
+        };
+
+        window.deleteStudent = async function(id) {
+            if(!confirm("Delete?")) return;
+            await deleteDoc(doc(db, "students", id));
+            await loadStudents();
+        };
+
+        async function loadTopicsForSubject(subject) {
+            const container = document.getElementById('topic-list-container');
+            const dropdown = document.getElementById('question-topic');
+            
+            if(!container) return; 
+            container.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const snap = await getDocs(query(collection(db, "topics"), where("subject", "==", subject)));
+                let topics = [];
+                snap.forEach(d => topics.push({id: d.id, ...d.data()}));
+                topics.sort((a,b) => a.number - b.number);
+
+                container.innerHTML = '';
+                if(topics.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:0.8rem">No topics. Add some!</p>';
+                    if(dropdown) dropdown.innerHTML = '<option value="">-- No Topics --</option>';
+                    return;
+                }
+
+                topics.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = 'topic-item';
+                    div.innerHTML = `
+                        <div style="display:flex;align-items:center">
+                            <div class="topic-number">${t.number}</div>
+                            <div>${t.name}</div>
+                        </div>
+                        <div class="topic-actions">
+                            <button onclick="editTopic('${t.id}', '${t.name}', ${t.number})">✏️</button>
+                            <button style="background:#f56565;color:white" onclick="deleteTopic('${t.id}')">🗑️</button>
+                        </div>
+                    `;                    container.appendChild(div);
+                });
+
+                if(dropdown) {
+                    dropdown.innerHTML = '<option value="">-- Select Topic --</option>';
+                    topics.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.id;
+                        opt.textContent = `${t.number}. ${t.name}`;
+                        dropdown.appendChild(opt);
+                    });
+                }
+            } catch(e) { console.error(e); if(container) container.innerHTML = 'Error'; }
+        }
+
+        window.saveTopic = async function() {
+            const name = document.getElementById('new-topic-name').value.trim();
+            const num = parseInt(document.getElementById('new-topic-number').value);
+            const editId = document.getElementById('edit-topic-id').value;
+
+            if(!name || !num) return alert("Fill name and number");
+
+            try {
+                const data = { subject: currentTopicSubject, name, number: num };
+                if(editId === "-1") await addDoc(collection(db, "topics"), data);
+                else await updateDoc(doc(db, "topics", editId), data);
+                
+                document.getElementById('new-topic-name').value = '';
+                document.getElementById('new-topic-number').value = '';
+                document.getElementById('edit-topic-id').value = '-1';
+                await loadTopicsForSubject(currentTopicSubject);
+                alert("Topic Saved!");
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        window.editTopic = function(id, name, num) {
+            document.getElementById('new-topic-name').value = name;
+            document.getElementById('new-topic-number').value = num;
+            document.getElementById('edit-topic-id').value = id;
+        };
+
+        window.deleteTopic = async function(id) {
+            if(!confirm("Delete topic?")) return;
+            await deleteDoc(doc(db, "topics", id));
+            await loadTopicsForSubject(currentTopicSubject);
+        };
+
+        async function loadAdminQuestions() {
+            const container = document.getElementById('questions-list');
+            if(!container) return;            container.innerHTML = '<p>Loading...</p>';
+            try {
+                const snap = await getDocs(query(collection(db, "questions"), where("subject", "==", currentAdminSubject)));
+                const qs = [];
+                snap.forEach(d => qs.push({id: d.id, ...d.data()}));
+                
+                document.getElementById('q-count').textContent = qs.length;
+                container.innerHTML = '';
+                
+                if(qs.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">No questions</p>';
+                    return;
+                }
+
+                qs.forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'topic-item';
+                    div.innerHTML = `
+                        <div style="flex:1; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <strong>Q${i+1}:</strong> ${q.q} <br>
+                            <small style="color:var(--text-secondary)">Topic: ${q.topicName || 'N/A'}</small>
+                        </div>
+                        <div class="topic-actions">
+                            <button onclick="editQuestion('${q.id}')">✏️</button>
+                            <button style="background:#f56565;color:white" onclick="deleteQuestion('${q.id}')">🗑️</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) { console.error(e); container.innerHTML = 'Error'; }
+        }
+
+        window.saveQuestion = async function() {
+            const qText = document.getElementById('admin-q-text').value.trim();
+            const exp = document.getElementById('admin-q-exp').value.trim();
+            const opts = [
+                document.getElementById('opt-a').value.trim(),
+                document.getElementById('opt-b').value.trim(),
+                document.getElementById('opt-c').value.trim(),
+                document.getElementById('opt-d').value.trim()
+            ];
+            const ans = parseInt(document.querySelector('input[name="correct-answer"]:checked').value);
+            const topicId = document.getElementById('question-topic').value;
+
+            if(!qText || !opts[0] || !topicId) return alert("Fill all fields and select a topic");
+
+            const topicSelect = document.getElementById('question-topic');
+            const topicName = topicSelect.options[topicSelect.selectedIndex].text;
+
+            const data = {                subject: currentAdminSubject,
+                topic: topicId,
+                topicName: topicName,
+                q: qText,
+                options: opts,
+                answer: ans,
+                exp: exp || "No explanation."
+            };
+
+            const editId = document.getElementById('edit-q-id').value;
+            try {
+                if(editId && editId !== "") {
+                    await updateDoc(doc(db, "questions", editId), data);
+                } else {
+                    await addDoc(collection(db, "questions"), data);
+                }                
+                clearAdminForm();
+                await loadAdminQuestions();
+                alert("Question Saved!");
+            } catch(e) { 
+                console.error(e);
+                alert("Error: " + e.message); 
+            }
+        };
+
+        window.editQuestion = async function(id) {
+            const snap = await getDocs(query(collection(db, "questions"), where("subject", "==", currentAdminSubject)));
+            let target = null;
+            snap.forEach(d => { if(d.id === id) target = d.data(); });
+            if(!target) return;
+
+            document.getElementById('edit-q-id').value = id;
+            document.getElementById('admin-q-text').value = target.q;
+            document.getElementById('admin-q-exp').value = target.exp;
+            document.getElementById('opt-a').value = target.options[0];
+            document.getElementById('opt-b').value = target.options[1];
+            document.getElementById('opt-c').value = target.options[2];
+            document.getElementById('opt-d').value = target.options[3];
+            document.getElementById('question-topic').value = target.topic;
+            
+            const radios = document.getElementsByName('correct-answer');
+            if(radios[target.answer]) radios[target.answer].checked = true;
+
+            document.getElementById('save-question-btn').textContent = "💾 Update";
+            document.getElementById('cancel-edit-btn').style.display = "inline-block";
+        };
+
+        window.clearAdminForm = function() {
+            document.getElementById('edit-q-id').value = "";
+            document.getElementById('save-question-btn').textContent = "💾 Save Question";            document.getElementById('cancel-edit-btn').style.display = "none";
+            document.getElementById('admin-q-text').value = '';
+            document.getElementById('admin-q-exp').value = '';
+            document.getElementById('opt-a').value = '';
+            document.getElementById('opt-b').value = '';
+            document.getElementById('opt-c').value = '';
+            document.getElementById('opt-d').value = '';
+            document.getElementById('question-topic').value = '';
+            const radios = document.getElementsByName('correct-answer');
+            if(radios[0]) radios[0].checked = true;
+        };
+
+        window.deleteQuestion = async function(id) {
+            if(!confirm("Delete?")) return;
+            await deleteDoc(doc(db, "questions", id));
+            await loadAdminQuestions();
+        };
+
+        async function loadProgressDashboard() {
+            const dash = document.getElementById('progress-dashboard');
+            if(!dash) return;
+            dash.innerHTML = '<p>Loading...</p>';
+            try {
+                const snap = await getDocs(query(collection(db, "progress"), where("user", "==", currentUser)));
+                const data = {};
+                snap.forEach(d => data[d.data().subject] = d.data());
+                
+                let html = '';
+                // ✅ Ensure subjects are loaded
+                if(subjects.length === 0) await initializeSubjects();
+                
+                subjects.forEach(sub => {
+                    const s = data[sub.id];
+                    const attempts = s ? s.attempts : 0;
+                    const avg = s ? Math.round(s.totalScore/attempts) : 0;
+                    html += `<div class="stat-card"><div>${sub.code}</div><div class="stat-value">${attempts}</div><div style="font-size:0.7rem">Avg: ${avg}%</div></div>`;
+                });
+                dash.innerHTML = html || '<p style="text-align:center;color:var(--text-secondary)">No progress yet</p>';
+            } catch(e) { dash.innerHTML = 'Error'; }
+        }
+
+        async function saveProgress(subject, scorePct) {
+            const q = query(collection(db, "progress"), where("user", "==", currentUser), where("subject", "==", subject));
+            const snap = await getDocs(q);
+            if(snap.empty) {
+                await addDoc(collection(db, "progress"), { user: currentUser, subject, attempts: 1, totalScore: scorePct, lastDate: new Date() });
+            } else {
+                const d = snap.docs[0];
+                await updateDoc(doc(db, "progress", d.id), {
+                    attempts: d.data().attempts + 1,                    totalScore: d.data().totalScore + scorePct,
+                    lastDate: new Date()
+                });
+            }
+        }
+
+        window.goToTopicSelection = function() {
+            const sub = document.getElementById('subject-select').value;
+            if(!sub) return alert("Select Subject");
+            currentSubject = sub;
+            const subj = subjects.find(s => s.id === sub);
+            document.getElementById('topic-subject-display').textContent = subj ? `${subj.code} - ${subj.name}` : sub;
+            
+            const sel = document.getElementById('topic-select');
+            sel.innerHTML = '<option value="" disabled selected>Select Topic</option><option value="all">📖 All Topics</option>';
+            document.getElementById('topic-question-count').style.display = 'none';
+            document.getElementById('proceed-to-mode-btn').disabled = true;
+            
+            showSection('topic-section');
+            loadTopicsForStudent(sub);
+        };
+
+        async function loadTopicsForStudent(subject) {
+            try {
+                const snap = await getDocs(query(collection(db, "topics"), where("subject", "==", subject)));
+                let topics = [];
+                snap.forEach(d => topics.push({id: d.id, ...d.data()}));
+                topics.sort((a,b) => a.number - b.number);
+                const sel = document.getElementById('topic-select');
+                if(!sel) return;
+                
+                // Clear existing options except first two
+                sel.innerHTML = '<option value="" disabled selected>Select Topic</option><option value="all">📖 All Topics</option>';
+                
+                topics.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = `${t.number}. ${t.name}`;
+                    sel.appendChild(opt);
+                });
+
+                // Remove old listener and add new one
+                const newSel = sel.cloneNode(true);
+                sel.parentNode.replaceChild(newSel, sel);
+                
+                newSel.addEventListener('change', async function() {
+                    const val = this.value;
+                    if(!val) {
+                        document.getElementById('topic-question-count').style.display = 'none';
+                        document.getElementById('proceed-to-mode-btn').disabled = true;                        return;
+                    }
+                    
+                    const q = val === 'all' 
+                        ? query(collection(db, "questions"), where("subject", "==", subject))
+                        : query(collection(db, "questions"), where("subject", "==", subject), where("topic", "==", val));
+                    
+                    const count = (await getDocs(q)).size;
+                    document.getElementById('q-count-display').textContent = count;
+                    document.getElementById('topic-question-count').style.display = 'block';
+                    document.getElementById('proceed-to-mode-btn').disabled = (count === 0);
+                    if(count === 0) alert("No questions for this topic yet!");
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        window.goToModeSelectionFromTopic = function() {
+            const topic = document.getElementById('topic-select').value;
+            if(!topic) return alert("Select Topic");
+            currentTopic = topic;
+            
+            const name = document.getElementById('topic-select').options[document.getElementById('topic-select').selectedIndex].text;
+            document.getElementById('selected-topic-display').textContent = name;
+            showSection('mode-section');
+        };
+
+        window.startExam = async function() {
+            currentMode = document.getElementById('mode-select').value;
+            try {
+                const q = currentTopic === 'all'
+                    ? query(collection(db, "questions"), where("subject", "==", currentSubject))
+                    : query(collection(db, "questions"), where("subject", "==", currentSubject), where("topic", "==", currentTopic));
+                
+                const snap = await getDocs(q);
+                let qs = [];
+                snap.forEach(d => qs.push(d.data()));
+                
+                if(qs.length === 0) return alert("No questions!");
+                
+                currentQuestions = qs.sort(() => Math.random() - 0.5);
+                currentQuestionIndex = 0;
+                score = 0;
+                userAnswers = {};
+                examStartTime = Date.now();
+                if(currentMode === 'beginner') { timePerQuestion = 0; totalTime = 3600; }
+                else if(currentMode === 'advance') { timePerQuestion = 45; totalTime = currentQuestions.length * 45; }
+                else { timePerQuestion = 30; totalTime = currentQuestions.length * 30; }
+
+                timeLeft = timePerQuestion > 0 ? timePerQuestion : totalTime;
+                const subj = subjects.find(s => s.id === currentSubject);
+                document.getElementById('subject-badge').textContent = subj ? subj.code : currentSubject.toUpperCase();
+                document.getElementById('mode-badge').textContent = currentMode;
+                
+                startTimer();
+                showSection('exam-section');
+                
+                const overlay = document.getElementById('countdown-overlay');
+                overlay.style.display = 'flex';
+                let c = 3;
+                overlay.textContent = c;
+                const int = setInterval(() => {
+                    c--;
+                    if(c>0) overlay.textContent = c;
+                    else {
+                        clearInterval(int);
+                        overlay.style.display = 'none';
+                        loadQuestion(0);
+                        if(isSoundEnabled) speakQuestion(currentQuestions[0]);
+                    }
+                }, 1000);
+
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if(timeLeft <= 0) handleTimeUp();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+            const s = (timeLeft%60).toString().padStart(2,'0');
+            document.getElementById('timer-display').textContent = `${m}:${s}`;
+            
+            const pct = timePerQuestion > 0 ? (timeLeft/timePerQuestion)*100 : (timeLeft/totalTime)*100;
+            const bar = document.getElementById('timer-progress');
+            if(bar) {
+                bar.style.width = `${pct}%`;
+                bar.className = 'timer-progress ' + (pct < 30 ? 'red' : pct < 60 ? 'blue' : '');
+            }
+        }
+
+        function loadQuestion(idx) {
+            if(!currentQuestions[idx]) return;            const q = currentQuestions[idx];
+            document.getElementById('q-text').textContent = q.q;
+            document.getElementById('question-counter').textContent = `Q: ${idx+1}/${currentQuestions.length}`;
+            document.getElementById('live-score').textContent = score;
+            
+            const expBox = document.getElementById('explanation-box');
+            const hasAnswered = userAnswers[idx] !== undefined;
+            
+            if(hasAnswered) {
+                expBox.style.display = 'block';
+                if(userAnswers[idx] === -1) {
+                    expBox.innerHTML = '<strong style="color:red">⏰ Time Up!</strong><br>' + q.exp;
+                } else {
+                    expBox.innerHTML = '<strong>💡 Explanation:</strong> ' + q.exp;
+                }
+            } else {
+                expBox.style.display = 'none';
+            }
+
+            const cont = document.getElementById('options-container');
+            if(!cont) return;
+            cont.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-label">${String.fromCharCode(65+i)}</span> ${opt}`;
+                
+                if(hasAnswered) {
+                    btn.disabled = true;                    
+                    if(userAnswers[idx] === -1) {
+                        if(i === q.answer) {
+                            btn.classList.add('correct');
+                        } else {
+                            btn.classList.add('time-up');
+                        }
+                    } else {
+                        if(i === q.answer) {
+                            btn.classList.add('correct');
+                        } else if(i === userAnswers[idx]) {
+                            btn.classList.add('wrong');
+                        }
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(idx, i, btn);
+                }
+                cont.appendChild(btn);
+            });
+            document.getElementById('prev-btn').disabled = (idx === 0);
+            const isLast = (idx === currentQuestions.length - 1);            document.getElementById('next-btn').style.display = isLast ? 'none' : 'block';
+            document.getElementById('submit-btn').style.display = isLast ? 'block' : 'none';
+        }
+
+        window.handleAnswer = function(idx, optIdx, btn) {
+            if(userAnswers[idx] !== undefined) return;
+            
+            if(nextQuestionTimeout) {
+                clearTimeout(nextQuestionTimeout);
+                nextQuestionTimeout = null;
+            }
+            
+            if(speechSynthesis) speechSynthesis.cancel();
+            
+            userAnswers[idx] = optIdx;
+            const correct = currentQuestions[idx].answer;
+            
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+            
+            if(optIdx === correct) {
+                btn.classList.add('correct');
+                score++;
+                document.getElementById('live-score').textContent = score;
+                if(isSoundEnabled) speak("Correct!");
+            } else {
+                btn.classList.add('wrong');
+                if(allBtns[correct]) allBtns[correct].classList.add('correct');
+                if(isSoundEnabled) speak("Wrong");
+            }
+            
+            document.getElementById('explanation-box').style.display = 'block';
+            document.getElementById('explanation-text').textContent = currentQuestions[idx].exp;
+
+            if(currentMode === 'advance' || currentMode === 'professional') {
+                nextQuestionTimeout = setTimeout(() => {
+                    if(idx < currentQuestions.length - 1) {
+                        currentQuestionIndex++;
+                        loadQuestion(currentQuestionIndex);
+                        if(timePerQuestion > 0) {
+                            timeLeft = timePerQuestion;
+                            startTimer();
+                        }
+                        if(isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+                    } else {
+                        finishExam(false);
+                    }
+                }, autoAdvanceDelay);
+            }
+        };
+        window.nextQuestion = function() {
+            if(currentQuestionIndex < currentQuestions.length - 1) {
+                if(nextQuestionTimeout) {
+                    clearTimeout(nextQuestionTimeout);
+                    nextQuestionTimeout = null;
+                }
+                
+                clearInterval(timerInterval);
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+                
+                if(timePerQuestion > 0 && userAnswers[currentQuestionIndex] === undefined) {
+                    timeLeft = timePerQuestion;
+                    startTimer();
+                }
+                
+                if(isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+            }
+        };
+
+        window.prevQuestion = function() {
+            if(currentQuestionIndex > 0) {
+                if(nextQuestionTimeout) {
+                    clearTimeout(nextQuestionTimeout);
+                    nextQuestionTimeout = null;
+                }
+                
+                clearInterval(timerInterval);
+                currentQuestionIndex--;
+                loadQuestion(currentQuestionIndex);
+                
+                if(timePerQuestion > 0 && userAnswers[currentQuestionIndex] === undefined) {
+                    timeLeft = timePerQuestion;
+                    startTimer();
+                }
+            }
+        };
+
+        function handleTimeUp() {
+            if(userAnswers[currentQuestionIndex] !== undefined) return;
+            
+            userAnswers[currentQuestionIndex] = -1;
+            loadQuestion(currentQuestionIndex);
+            
+            if(isSoundEnabled) {
+                speak("Time's up");
+            }
+            
+            if(nextQuestionTimeout) {                clearTimeout(nextQuestionTimeout);
+            }
+            
+            nextQuestionTimeout = setTimeout(() => {
+                if(currentQuestionIndex < currentQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    loadQuestion(currentQuestionIndex);
+                    if(timePerQuestion > 0) { 
+                        timeLeft = timePerQuestion; 
+                        startTimer(); 
+                    }
+                    if(isSoundEnabled) speakQuestion(currentQuestions[currentQuestionIndex]);
+                } else {
+                    finishExam(false);
+                }
+            }, 5000);
+        }
+
+        window.finishExam = function(manual = false) {
+            clearInterval(timerInterval);
+            if(nextQuestionTimeout) {
+                clearTimeout(nextQuestionTimeout);
+                nextQuestionTimeout = null;
+            }
+            
+            const timeUsed = Math.floor((Date.now() - examStartTime)/1000);
+            const pct = Math.round((score/currentQuestions.length)*100);
+            
+            saveProgress(currentSubject, pct);            
+            document.getElementById('final-score').textContent = `${score}/${currentQuestions.length}`;
+            document.getElementById('percentage').textContent = `${pct}%`;
+            document.getElementById('correct-count').textContent = score;
+            document.getElementById('wrong-count').textContent = currentQuestions.length - score;
+            document.getElementById('time-used').textContent = `${Math.floor(timeUsed/60)}m ${timeUsed%60}s`;
+            
+            let grade = "Fair", msg = "Keep practicing", cls = "grade-fair";
+            if(pct >= 70) { grade = "Excellent"; msg = "Great job!"; cls = "grade-excellence"; }
+            else if(pct >= 50) { grade = "Good"; msg = "Well done"; cls = "grade-good"; }
+            
+            const gEl = document.getElementById('grade-display');
+            gEl.textContent = grade;
+            gEl.className = `grade-badge ${cls}`;
+            document.getElementById('feedback-msg').textContent = msg;
+            
+            showSection('result-section');
+            if(isSoundEnabled) speak(`Exam over. Score ${score} out of ${currentQuestions.length}`);
+        };
+
+        function speak(text) {
+            if(!isSoundEnabled || !speechSynthesis) return;            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9;
+            speechSynthesis.speak(u);
+        }
+
+        window.speakQuestion = function(q) {
+            if(!isSoundEnabled || !speechSynthesis) return;
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(q.q);
+            u.rate = 0.9;
+            speechSynthesis.speak(u);
+        };
+
+        window.replayCurrentQuestion = function() {
+            if(currentQuestions.length) speakQuestion(currentQuestions[currentQuestionIndex]);
+        };
+
+        // ✅ FIX: Calculator function - properly exposed and with fallback
+        window.openCalculator = function() {
+            // Save current exam state to localStorage
+            const examState = {
+                currentQuestionIndex: currentQuestionIndex,
+                currentSubject: currentSubject,
+                currentTopic: currentTopic,
+                currentMode: currentMode,
+                score: score,
+                userAnswers: JSON.parse(JSON.stringify(userAnswers)),
+                timeLeft: timeLeft,
+                totalTime: totalTime,
+                examStartTime: examStartTime,
+                currentQuestions: JSON.parse(JSON.stringify(currentQuestions)),
+                isExamActive: true
+            };
+            
+            localStorage.setItem('hgdl_examState', JSON.stringify(examState));
+            
+            // Navigate to calculator with return URL
+            window.location.href = 'calculator.html?returnTo=exam';
+        };
+
+        // Restore exam state when returning from calculator
+        window.restoreExamState = function() {
+            const savedState = localStorage.getItem('hgdl_examState');
+            if (savedState) {
+                try {
+                    const state = JSON.parse(savedState);
+                    
+                    if(state.isExamActive) {
+                        currentQuestionIndex = state.currentQuestionIndex;                        currentSubject = state.currentSubject;
+                        currentTopic = state.currentTopic;
+                        currentMode = state.currentMode;
+                        score = state.score;
+                        userAnswers = state.userAnswers;
+                        timeLeft = state.timeLeft;
+                        totalTime = state.totalTime;
+                        examStartTime = state.examStartTime;
+                        currentQuestions = state.currentQuestions;
+                        
+                        console.log('✅ Exam state restored');
+                        localStorage.removeItem('hgdl_examState');
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error restoring exam state:', e);
+                }
+            }
+            return false;
+        };
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Theme and sound toggles
+            if (localStorage.getItem('hgdl_theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            
+            const soundToggle = document.getElementById('sound-toggle');
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            if(soundToggle) {
+                soundToggle.addEventListener('click', function() {
+                    isSoundEnabled = !isSoundEnabled;
+                    this.classList.toggle('muted', !isSoundEnabled);
+                    if(isSoundEnabled) speak("Sound On");
+                });
+            }
+
+            if(themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('hgdl_theme', next);
+                });
+            }
+
+            // ✅ Load subjects on page load for everyone
+            await initializeSubjects();            
+            // Check if returning from calculator
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get('returning') === 'calculator') {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                if(restoreExamState() && currentQuestions.length > 0) {
+                    showSection('exam-section');
+                    loadQuestion(currentQuestionIndex);
+                    if(timePerQuestion > 0) startTimer();
+                }
+            }
+        });
+
+        // Export functions for global access
+        window.loadStudents = loadStudents;
+        window.loadAdminQuestions = loadAdminQuestions;
+        window.loadTopicsForSubject = loadTopicsForSubject;
+        window.restoreExamState = restoreExamState;
+    </script>
 </body>
 </html>

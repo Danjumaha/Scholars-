@@ -19,6 +19,7 @@ const db = getFirestore(app);
 // Global variables
 let currentUser = null;
 let currentSubject = '';
+let currentTopic = '';
 let currentMode = '';
 let currentQuestions = [];
 let currentQuestionIndex = 0;
@@ -36,8 +37,17 @@ const speechSynthesis = window.speechSynthesis;
 const positiveMessages = ["Wow!", "Amazing!", "Nice one!", "Good job!", "Excellent!", "Perfect!", "Correct!", "Fantastic!"];
 const negativeMessages = ["Oh sorry!", "Try again!", "Not quite!", "Incorrect!", "Wrong answer!", "Keep trying!"];
 
-// Theme and Sound toggles
-const themeToggle = document.getElementById('theme-toggle');
+// Admin state
+let currentAdminSubject = 'ecn131';
+let currentTopicSubject = 'ecn131';
+
+// Subject names mapping
+const subjectNames = { 
+    ecn131: 'ECN 131', bus120: 'BUS 120', bus112: 'BUS 112', 
+    acc121: 'ACC 121', irp120: 'IRP 120', ecn141: 'ECN 141', ns31: 'NS 31' 
+};
+
+// Theme and Sound togglesconst themeToggle = document.getElementById('theme-toggle');
 const soundToggle = document.getElementById('sound-toggle');
 
 if (localStorage.getItem('hgdl_theme') === 'dark') {
@@ -47,7 +57,8 @@ if (localStorage.getItem('hgdl_theme') === 'dark') {
 themeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');    
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);    localStorage.setItem('hgdl_theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('hgdl_theme', newTheme);
 });
 
 soundToggle.addEventListener('click', function() {
@@ -69,7 +80,8 @@ window.showSection = function(id) {
     if (id === 'subject-section') loadProgressDashboard();
     if (id === 'admin-section') { 
         loadStudents(); 
-        loadAdminQuestions(); 
+        loadAdminQuestions();
+        loadTopicsForSubject(currentTopicSubject);
     }
 };
 
@@ -79,12 +91,12 @@ window.logout = function() {
     showSection('login-section');
 };
 
-// Student Management
+// ==================== STUDENT MANAGEMENT ====================
+
 async function loadStudents() {
     const container = document.getElementById('student-list-container');
     container.innerHTML = '<p>Loading...</p>';
-    
-    try {
+        try {
         console.log("🔍 Loading students from Firebase...");
         const querySnapshot = await getDocs(collection(db, "students"));
         let students = [];
@@ -96,7 +108,8 @@ async function loadStudents() {
         document.getElementById('student-count').textContent = students.length;
         
         if (students.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';            return;
+            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No students registered yet</p>';
+            return;
         }        
         container.innerHTML = '';
         students.forEach((student) => {
@@ -132,8 +145,7 @@ window.saveStudent = async function() {
         if (editId === "-1") {
             console.log("➕ Adding new student:", adm);
             const q = query(collection(db, "students"), where("adm", "==", adm));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) { alert("⚠️ This admission number already exists"); return; }
+            const querySnapshot = await getDocs(q);            if (!querySnapshot.empty) { alert("⚠️ This admission number already exists"); return; }
             
             await addDoc(collection(db, "students"), { adm: adm });
             console.log("✅ Student added successfully!");
@@ -145,7 +157,8 @@ window.saveStudent = async function() {
         
         input.value = '';
         document.getElementById('edit-adm-index').value = '-1';
-        document.getElementById('save-student-btn').textContent = "✅ Register Number";        alert("✅ Student saved successfully!");        
+        document.getElementById('save-student-btn').textContent = "✅ Register Number";
+        alert("✅ Student saved successfully!");        
         loadStudents();
     } catch (error) {
         console.error("❌ Error saving student:", error);
@@ -172,7 +185,274 @@ window.deleteStudent = async function(id) {
     }
 };
 
-// Login Function
+// ==================== TOPIC MANAGEMENT ====================
+
+// Setup topic subject tabs
+document.querySelectorAll('#topic-subject-tabs .subject-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('#topic-subject-tabs .subject-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentTopicSubject = this.dataset.subject;
+        loadTopicsForSubject(currentTopicSubject);
+    });});
+
+async function loadTopicsForSubject(subject) {
+    const container = document.getElementById('topic-list-container');
+    container.innerHTML = '<p>Loading topics...</p>';
+    
+    try {
+        const q = query(collection(db, "topics"), where("subject", "==", subject));
+        const querySnapshot = await getDocs(q);
+        
+        let topics = [];
+        querySnapshot.forEach((doc) => topics.push({ id: doc.id, ...doc.data() }));
+        
+        // Sort by topic number
+        topics.sort((a, b) => a.number - b.number);
+        
+        container.innerHTML = '';
+        
+        if (topics.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">No topics added yet for ' + subject.toUpperCase() + '</div>';
+            updateQuestionTopicDropdown([]);
+            return;
+        }
+        
+        topics.forEach((topic) => {
+            const topicDiv = document.createElement('div');
+            topicDiv.className = 'topic-item';
+            topicDiv.innerHTML = `
+                <div style="display:flex; align-items:center; flex:1;">
+                    <div class="topic-number">${topic.number}</div>
+                    <div class="topic-name">${topic.name}</div>
+                </div>
+                <div class="topic-actions">
+                    <button class="edit-topic-btn" onclick="editTopic('${topic.id}', '${topic.name}', ${topic.number})">✏️ Edit</button>
+                    <button class="delete-topic-btn" onclick="deleteTopic('${topic.id}')">🗑️ Delete</button>
+                </div>
+            `;
+            container.appendChild(topicDiv);
+        });
+        
+        updateQuestionTopicDropdown(topics);
+    } catch (error) {
+        console.error("Error loading topics:", error);
+        container.innerHTML = 'Error loading topics.';
+    }
+}
+
+function updateQuestionTopicDropdown(topics) {
+    const dropdown = document.getElementById('question-topic');
+    dropdown.innerHTML = '<option value="">-- Select a Topic --</option>';    
+    topics.forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic.id;
+        option.textContent = `${topic.number}. ${topic.name}`;
+        dropdown.appendChild(option);
+    });
+}
+
+window.saveTopic = async function() {
+    const nameInput = document.getElementById('new-topic-name');
+    const numberInput = document.getElementById('new-topic-number');
+    const editId = document.getElementById('edit-topic-id').value;
+    
+    const name = nameInput.value.trim();
+    const number = parseInt(numberInput.value);
+    
+    if (!name) { alert("⚠️ Please enter topic name"); return; }
+    if (!number || number < 1) { alert("⚠️ Please enter a valid topic number"); return; }
+    
+    try {
+        const topicData = {
+            subject: currentTopicSubject,
+            name: name,
+            number: number
+        };
+        
+        if (editId === "-1") {
+            await addDoc(collection(db, "topics"), topicData);
+            alert("✅ Topic added successfully!");
+        } else {
+            await updateDoc(doc(db, "topics", editId), topicData);
+            alert("✅ Topic updated successfully!");
+        }
+        
+        nameInput.value = '';
+        numberInput.value = '';
+        document.getElementById('edit-topic-id').value = '-1';
+        
+        loadTopicsForSubject(currentTopicSubject);
+    } catch (error) {
+        console.error("Error saving topic:", error);
+        alert("Error saving topic.");
+    }
+};
+
+window.editTopic = function(id, name, number) {
+    document.getElementById('new-topic-name').value = name;
+    document.getElementById('new-topic-number').value = number;
+    document.getElementById('edit-topic-id').value = id;    document.getElementById('new-topic-name').focus();
+};
+
+window.deleteTopic = async function(id) {
+    if (!confirm("⚠️ Delete this topic? Questions assigned to this topic will still exist but won't have a topic reference.")) return;
+    try {
+        await deleteDoc(doc(db, "topics", id));
+        loadTopicsForSubject(currentTopicSubject);
+    } catch (error) {
+        console.error("Error deleting topic:", error);
+        alert("Error deleting topic.");
+    }
+};
+
+// ==================== QUESTION MANAGEMENT ====================
+
+// Setup question subject tabs
+document.querySelectorAll('.subject-tabs:not(#topic-subject-tabs) .subject-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.subject-tabs:not(#topic-subject-tabs) .subject-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentAdminSubject = this.dataset.subject;
+        loadAdminQuestions();
+        loadTopicsForSubject(currentAdminSubject);
+    });
+});
+
+async function loadAdminQuestions() {
+    const container = document.getElementById('questions-list');
+    container.innerHTML = '<p>Loading questions...</p>';
+    
+    try {
+        const q = query(collection(db, "questions"), where("subject", "==", currentAdminSubject));
+        const querySnapshot = await getDocs(q);
+        
+        let questions = [];
+        querySnapshot.forEach((doc) => questions.push({ id: doc.id, ...doc.data() }));
+
+        document.getElementById('q-count').textContent = questions.length;
+        container.innerHTML = '';        
+        
+        if (questions.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">No questions added yet</div>';
+            return;
+        }
+        
+        questions.forEach((q, index) => {
+            const correctLetter = String.fromCharCode(65 + q.answer);
+            const topicName = q.topicName || 'No Topic';
+                        container.innerHTML += `                
+            <div class="question-item">
+                <div style="flex:1; margin-right:10px;">
+                    <strong>Q${index + 1}:</strong> ${q.q.substring(0, 50)}...<br>
+                    <small style="color:#666;">📚 ${topicName} | ✅ ${correctLetter}</small>
+                </div>
+                <div class="item-actions">
+                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
+                </div>
+            </div>`;
+        });
+    } catch (error) {
+        console.error("Error loading questions:", error);
+        container.innerHTML = 'Error loading questions.';
+    }
+}
+
+window.saveQuestion = async function() {
+    const editId = document.getElementById('edit-q-id').value;
+    const qText = document.getElementById('admin-q-text').value.trim();
+    const qExp = document.getElementById('admin-q-exp').value.trim();
+    const optA = document.getElementById('opt-a').value.trim();
+    const optB = document.getElementById('opt-b').value.trim();
+    const optC = document.getElementById('opt-c').value.trim();
+    const optD = document.getElementById('opt-d').value.trim();
+    const correctAnswer = parseInt(document.querySelector('input[name="correct-answer"]:checked').value);
+    const topicId = document.getElementById('question-topic').value;
+    
+    if (!qText || !optA || !optB || !optC || !optD) return alert("⚠️ Please fill in all fields");
+    if (!topicId) return alert("⚠️ Please select a topic for this question");
+    
+    // Get topic name
+    const topicSelect = document.getElementById('question-topic');
+    const topicName = topicSelect.options[topicSelect.selectedIndex].text;
+    
+    const questionData = { 
+        subject: currentAdminSubject, 
+        topic: topicId,
+        topicName: topicName,
+        q: qText, 
+        options: [optA, optB, optC, optD], 
+        answer: correctAnswer, 
+        exp: qExp || "No explanation provided."
+    };
+
+    try {
+        if (editId) {
+            await updateDoc(doc(db, "questions", editId), questionData);
+            clearAdminForm(); alert("✅ Question Updated!");        } else {
+            await addDoc(collection(db, "questions"), questionData);
+            clearAdminForm(); alert("✅ Question Added!");
+        }
+        loadAdminQuestions();
+    } catch (error) {
+        console.error("Error saving question:", error);
+        alert("Error saving question.");
+    }
+};
+
+window.editQuestion = async function(id) {
+    const qSnap = await getDocs(query(collection(db, "questions"), where("subject", "==", currentAdminSubject)));
+    let targetQ = null;
+    qSnap.forEach(d => { if(d.id === id) targetQ = d.data(); });
+    if(!targetQ) return;
+
+    document.getElementById('edit-q-id').value = id;
+    document.getElementById('admin-q-text').value = targetQ.q;
+    document.getElementById('admin-q-exp').value = targetQ.exp;
+    document.getElementById('opt-a').value = targetQ.options[0];
+    document.getElementById('opt-b').value = targetQ.options[1];
+    document.getElementById('opt-c').value = targetQ.options[2];
+    document.getElementById('opt-d').value = targetQ.options[3];
+    
+    // Set topic if exists
+    if(targetQ.topic) {
+        document.getElementById('question-topic').value = targetQ.topic;
+    }
+    
+    const radios = document.getElementsByName('correct-answer');
+    radios[targetQ.answer].checked = true;
+    
+    document.getElementById('save-question-btn').textContent = "💾 Update Question";
+    document.getElementById('cancel-edit-btn').style.display = "inline-block";
+};
+
+window.clearAdminForm = function() {
+    document.getElementById('edit-q-id').value = "";
+    document.getElementById('save-question-btn').textContent = "💾 Save Question";
+    document.getElementById('cancel-edit-btn').style.display = "none";
+    document.getElementById('admin-q-text').value = '';
+    document.getElementById('admin-q-exp').value = '';
+    document.getElementById('opt-a').value = '';
+    document.getElementById('opt-b').value = '';
+    document.getElementById('opt-c').value = '';
+    document.getElementById('opt-d').value = '';
+    document.getElementById('question-topic').value = '';
+    document.querySelector('input[name="correct-answer"][value="0"]').checked = true;
+};
+window.deleteQuestion = async function(id) {
+    if (!confirm("⚠️ Delete this question?")) return;
+    try {
+        await deleteDoc(doc(db, "questions", id));
+        loadAdminQuestions();
+    } catch (error) {
+        console.error("Error deleting question:", error);
+        alert("Error deleting question.");
+    }
+};
+
+// ==================== LOGIN & PROGRESS ====================
+
 window.handleLogin = async function() {
     const adm = document.getElementById('adm-input').value.trim().toUpperCase();
     if(!adm) return alert("Please enter admission number");
@@ -194,11 +474,11 @@ window.handleLogin = async function() {
             alert("❌ Access Denied\n\nAdmission number not registered.\nPlease contact administrator.");
         }
     } catch (error) {
-        console.error("❌ Login error:", error);        alert("❌ Connection error: " + error.message);    
+        console.error("❌ Login error:", error);
+        alert("❌ Connection error: " + error.message);    
     }
 };
 
-// Progress Tracking
 async function loadProgressDashboard() {
     const dashboard = document.getElementById('progress-dashboard');
     dashboard.innerHTML = '<p>Loading stats...</p>';
@@ -209,7 +489,6 @@ async function loadProgressDashboard() {
         
         let userData = {};
         querySnapshot.forEach((doc) => { userData[doc.data().subject] = doc.data(); });
-
         let html = '';
         const subjects = ['ecn131', 'bus120', 'bus112', 'acc121', 'irp120', 'ecn141', 'ns31'];
         
@@ -243,7 +522,8 @@ async function saveProgress(subject, scorePercent) {
             user: currentUser, subject: subject, attempts: 1,
             totalScore: scorePercent, lastDate: new Date()
         });
-    } else {        const docId = querySnapshot.docs[0].id;        
+    } else {
+        const docId = querySnapshot.docs[0].id;        
         const oldData = querySnapshot.docs[0].data();
         await updateDoc(doc(db, "progress", docId), {
             attempts: oldData.attempts + 1,
@@ -253,146 +533,110 @@ async function saveProgress(subject, scorePercent) {
     }
 }
 
-// Admin Question Management
-let currentAdminSubject = 'ecn131';
+// ==================== TOPIC & MODE SELECTION ====================
 
-document.querySelectorAll('.subject-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-        document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        currentAdminSubject = this.dataset.subject;
-        loadAdminQuestions();
-    });
-});
-
-async function loadAdminQuestions() {
-    const container = document.getElementById('questions-list');
-    container.innerHTML = '<p>Loading questions...</p>';
+window.goToTopicSelection = function() {
+    const sub = document.getElementById('subject-select').value;
+    if (!sub) return alert("⚠️ Please select a subject first");    currentSubject = sub;
     
+    document.getElementById('topic-subject-display').textContent = subjectNames[sub];
+    
+    // Reset topic selection
+    const topicSelect = document.getElementById('topic-select');
+    topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option><option value="all">📖 All Topics (Full Practice)</option>';
+    document.getElementById('topic-question-count').style.display = 'none';
+    document.getElementById('proceed-to-mode-btn').disabled = true;
+    
+    showSection('topic-section');
+    loadTopicsForStudent(sub);
+};
+
+async function loadTopicsForStudent(subject) {
     try {
-        const q = query(collection(db, "questions"), where("subject", "==", currentAdminSubject));
+        const q = query(collection(db, "topics"), where("subject", "==", subject));
         const querySnapshot = await getDocs(q);
         
-        let questions = [];
-        querySnapshot.forEach((doc) => questions.push({ id: doc.id, ...doc.data() }));
-
-        document.getElementById('q-count').textContent = questions.length;
-        container.innerHTML = '';        
-        if (questions.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">No questions added yet</div>';
-            return;
-        }
+        let topics = [];
+        querySnapshot.forEach((doc) => topics.push({ id: doc.id, ...doc.data() }));
         
-        questions.forEach((q, index) => {
-            const correctLetter = String.fromCharCode(65 + q.answer);
-            container.innerHTML += `                
-            <div class="question-item">
-                <div style="flex:1; margin-right:10px;">
-                    <strong>Q${index + 1}:</strong> ${q.q.substring(0, 50)}...<br>
-                    <small style="color:#666;">✅ ${correctLetter}</small>
-                </div>
-                <div class="item-actions">
-                    <button class="edit-btn" onclick="editQuestion('${q.id}')">✏️ Edit</button>                                        <button class="delete-btn" onclick="deleteQuestion('${q.id}')">🗑️</button>
-                </div>
-            </div>`;
+        // Sort by topic number
+        topics.sort((a, b) => a.number - b.number);
+        
+        const topicSelect = document.getElementById('topic-select');
+        topics.forEach(topic => {
+            const option = document.createElement('option');
+            option.value = topic.id;
+            option.textContent = `${topic.number}. ${topic.name}`;
+            topicSelect.appendChild(option);
         });
+        
+        // Add change listener
+        topicSelect.addEventListener('change', async function() {
+            const selectedTopic = this.value;
+            if (!selectedTopic) {
+                document.getElementById('topic-question-count').style.display = 'none';
+                document.getElementById('proceed-to-mode-btn').disabled = true;
+                return;
+            }
+            
+            try {
+                let q;
+                if (selectedTopic === 'all') {
+                    q = query(collection(db, "questions"), where("subject", "==", subject));
+                } else {
+                    q = query(collection(db, "questions"), 
+                             where("subject", "==", subject), 
+                             where("topic", "==", selectedTopic));                }
+                
+                const querySnapshot = await getDocs(q);
+                const count = querySnapshot.size;
+                
+                document.getElementById('q-count-display').textContent = count;
+                document.getElementById('topic-question-count').style.display = 'block';
+                document.getElementById('proceed-to-mode-btn').disabled = (count === 0);
+                
+                if (count === 0) {
+                    alert("⚠️ No questions available for this topic yet!");
+                }
+            } catch (error) {
+                console.error("Error loading topic questions:", error);
+            }
+        });
+        
     } catch (error) {
-        console.error("Error loading questions:", error);
-        container.innerHTML = 'Error loading questions.';
+        console.error("Error loading topics:", error);
     }
 }
 
-window.saveQuestion = async function() {
-    const editId = document.getElementById('edit-q-id').value;
-    const qText = document.getElementById('admin-q-text').value.trim();
-    const qExp = document.getElementById('admin-q-exp').value.trim();
-    const optA = document.getElementById('opt-a').value.trim();
-    const optB = document.getElementById('opt-b').value.trim();
-    const optC = document.getElementById('opt-c').value.trim();
-    const optD = document.getElementById('opt-d').value.trim();
-    const correctAnswer = parseInt(document.querySelector('input[name="correct-answer"]:checked').value);
+window.goToModeSelectionFromTopic = function() {
+    const topic = document.getElementById('topic-select').value;
+    if (!topic) return alert("⚠️ Please select a topic first");
     
-    if (!qText || !optA || !optB || !optC || !optD) return alert("⚠️ Please fill in all fields");
+    currentTopic = topic;
     
-    const questionData = { 
-        subject: currentAdminSubject, q: qText, 
-        options: [optA, optB, optC, optD], 
-        answer: correctAnswer, exp: qExp || "No explanation provided."
-    };
-
-    try {
-        if (editId) {
-            await updateDoc(doc(db, "questions", editId), questionData);
-            clearAdminForm(); alert("✅ Question Updated!");
-        } else {
-            await addDoc(collection(db, "questions"), questionData);
-            clearAdminForm(); alert("✅ Question Added!");
-        }
-        loadAdminQuestions();
-    } catch (error) {
-        console.error("Error saving question:", error);
-        alert("Error saving question.");
-    }
-};
-
-window.editQuestion = async function(id) {
-    const qSnap = await getDocs(query(collection(db, "questions"), where("subject", "==", currentAdminSubject)));
-    let targetQ = null;
-    qSnap.forEach(d => { if(d.id === id) targetQ = d.data(); });
-    if(!targetQ) return;
-
-    document.getElementById('edit-q-id').value = id;        document.getElementById('admin-q-text').value = targetQ.q;
-    document.getElementById('admin-q-exp').value = targetQ.exp;
-    document.getElementById('opt-a').value = targetQ.options[0];
-    document.getElementById('opt-b').value = targetQ.options[1];
-    document.getElementById('opt-c').value = targetQ.options[2];
-    document.getElementById('opt-d').value = targetQ.options[3];
+    // Get topic name
+    const topicSelect = document.getElementById('topic-select');
+    const topicName = topicSelect.options[topicSelect.selectedIndex].text;
     
-    const radios = document.getElementsByName('correct-answer');
-    radios[targetQ.answer].checked = true;
+    document.getElementById('selected-subject-display').textContent = `${subjectNames[currentSubject]}`;
+    document.getElementById('selected-topic-display').textContent = topicName;
     
-    document.getElementById('save-question-btn').textContent = "💾 Update Question";
-    document.getElementById('cancel-edit-btn').style.display = "inline-block";
-};
-
-window.clearAdminForm = function() {
-    document.getElementById('edit-q-id').value = "";
-    document.getElementById('save-question-btn').textContent = "💾 Save Question";
-    document.getElementById('cancel-edit-btn').style.display = "none";
-    document.getElementById('admin-q-text').value = '';
-    document.getElementById('admin-q-exp').value = '';
-    document.getElementById('opt-a').value = '';
-    document.getElementById('opt-b').value = '';
-    document.getElementById('opt-c').value = '';
-    document.getElementById('opt-d').value = '';
-    document.querySelector('input[name="correct-answer"][value="0"]').checked = true;
-};
-
-window.deleteQuestion = async function(id) {
-    if (!confirm("⚠️ Delete this question?")) return;
-    try {
-        await deleteDoc(doc(db, "questions", id));
-        loadAdminQuestions();
-    } catch (error) {
-        console.error("Error deleting question:", error);
-        alert("Error deleting question.");
-    }
-};
-
-// Mode Selection
-window.goToModeSelection = function() {
-    const sub = document.getElementById('subject-select').value;
-    if (!sub) return alert("⚠️ Please select a subject first");
-    currentSubject = sub;
-    const subjectNames = { ecn131: 'ECN 131', bus120: 'BUS 120', bus112: 'BUS 112', acc121: 'ACC 121', irp120: 'IRP 120', ecn141: 'ECN 141', ns31: 'NS 31' };
-    document.getElementById('selected-subject-display').textContent = subjectNames[sub];
     showSection('mode-section');
 };
 
-// Start Exam
-window.startExam = async function() {        currentMode = document.getElementById('mode-select').value;
+// ==================== EXAM FUNCTIONS ====================
+
+window.startExam = async function() {
+    currentMode = document.getElementById('mode-select').value;
     try {
-        const q = query(collection(db, "questions"), where("subject", "==", currentSubject));
+        let q;
+        if (currentTopic === 'all') {
+            q = query(collection(db, "questions"), where("subject", "==", currentSubject));
+        } else {
+            q = query(collection(db, "questions"), 
+                     where("subject", "==", currentSubject), 
+                     where("topic", "==", currentTopic));        }
+        
         const querySnapshot = await getDocs(q);
         
         let fetchedQuestions = [];
@@ -400,7 +644,10 @@ window.startExam = async function() {        currentMode = document.getElementBy
 
         currentQuestions = fetchedQuestions.sort(() => Math.random() - 0.5);
 
-        if(currentQuestions.length === 0) { alert("No questions available for this subject yet!"); return; }
+        if(currentQuestions.length === 0) { 
+            alert("No questions available for this topic yet!"); 
+            return; 
+        }
 
         currentQuestionIndex = 0; 
         score = 0; 
@@ -408,7 +655,6 @@ window.startExam = async function() {        currentMode = document.getElementBy
         bookmarks = [];
         examStartTime = Date.now();
         
-        // Set time per question based on mode
         if (currentMode === 'beginner') {
             timePerQuestion = 0;  
             totalTime = 7200;  
@@ -420,7 +666,6 @@ window.startExam = async function() {        currentMode = document.getElementBy
             totalTime = currentQuestions.length * timePerQuestion;
         }
 
-        // Initialize timer state
         timeLeft = timePerQuestion > 0 ? timePerQuestion : totalTime;
 
         document.getElementById('subject-badge').textContent = currentSubject.toUpperCase();
@@ -587,7 +832,6 @@ function showFeedbackOverlay(isCorrect) {
         overlay.style.transform = "translate(-25%, -25%) scale(1)";
     }, 1500);
 }
-// Question Rendering (FIXED: Handles timeout state correctly)
 function loadQuestion(index) {
     const qData = currentQuestions[index];
     
@@ -598,12 +842,10 @@ function loadQuestion(index) {
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
     
-    // Check if answered (including timeout -1)
     if (userAnswers[index] !== undefined) {
         expBox.style.display = 'block';
         expText.textContent = qData.exp || "No explanation available.";
         
-        // If timed out, show specific message
         if (userAnswers[index] === -1) {
             const timeoutMsg = document.createElement('div');
             timeoutMsg.style.cssText = 'color: #c62828; font-weight: bold; margin-bottom: 10px; padding: 10px; background: #ffebee; border-radius: 8px; text-align: center;';
@@ -629,24 +871,20 @@ function loadQuestion(index) {
         btn.innerHTML = `<span class="option-label">${letter}</span> ${opt}`;
         
         if (hasAnswered) {
-            // Disable buttons if already answered
             btn.disabled = true;
             btn.style.cursor = 'not-allowed';
             
             if (userAnswer === -1) {
-                // Timed out: Only show correct answer
-                if (i === qData.answer) {                    btn.classList.add('correct');
+                if (i === qData.answer) {
+                    btn.classList.add('correct');
                     btn.style.background = 'linear-gradient(135deg, #a5d6a7 0%, #81c784 100%)';
                 } else {
                     btn.style.opacity = '0.6';
-                }
-            } else {
-                // Manually answered: Show correct/wrong
+                }            } else {
                 if (i === qData.answer) btn.classList.add('correct');
                 else if (i === userAnswer) btn.classList.add('wrong');
             }
         } else {
-            // Not answered yet
             btn.onclick = () => handleAnswer(index, i, btn);
         }
         container.appendChild(btn);
@@ -662,14 +900,12 @@ function loadQuestion(index) {
     }
 }
 
-// Handle Answer Submission (FIXED: Cancels speech to prevent stuck animation)
 window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     if (!currentQuestions || !currentQuestions[qIndex]) return;
     
     const qData = currentQuestions[qIndex];
     const correctIndex = qData.answer;
     
-    // FIX: Cancel speech immediately so animation doesn't get stuck
     speechSynthesis.cancel();
     
     userAnswers[qIndex] = optionIndex;
@@ -684,7 +920,8 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
 
     if (optionIndex === correctIndex) {
         btnElement.classList.add('correct', 'anim-pop');
-        score++;        document.getElementById('live-score').textContent = score;
+        score++;
+        document.getElementById('live-score').textContent = score;
         
         if (isSoundEnabled) {
             playTone(880, 0.1); 
@@ -692,8 +929,7 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
         }
     } else {
         btnElement.classList.add('wrong', 'anim-shake');
-        
-        if (buttons[correctIndex]) {
+                if (buttons[correctIndex]) {
             buttons[correctIndex].classList.add('correct');
         }
 
@@ -731,9 +967,9 @@ window.handleAnswer = function(qIndex, optionIndex, btnElement) {
     }, 15000); 
 };
 
-// Manual Navigation
 window.nextQuestion = function() { 
-    if (currentQuestionIndex < currentQuestions.length - 1) {        clearInterval(timerInterval);
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        clearInterval(timerInterval);
         currentQuestionIndex++; 
         loadQuestion(currentQuestionIndex);
         
@@ -743,7 +979,6 @@ window.nextQuestion = function() {
         }
     } 
 };
-
 window.prevQuestion = function() { 
     if (currentQuestionIndex > 0) {
         clearInterval(timerInterval);
@@ -757,7 +992,6 @@ window.prevQuestion = function() {
     } 
 };
 
-// Finish Exam
 window.finishExam = function(manualSubmit) {
     clearInterval(timerInterval);
     if(nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
@@ -782,7 +1016,8 @@ window.finishExam = function(manualSubmit) {
         else { grade = "Fair"; msg = "📚 Keep studying! You'll improve."; gradeClass = "grade-fair"; }
     } else {
         if (percentage >= 70) { grade = "Excellent"; msg = "🎉 Fantastic work!"; gradeClass = "grade-excellence"; }
-        else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }        else { grade = "Needs Practice"; msg = "💪 Don't give up! Try again."; gradeClass = "grade-fair"; }
+        else if (percentage >= 50) { grade = "Good"; msg = "👍 Well done!"; gradeClass = "grade-good"; }
+        else { grade = "Needs Practice"; msg = "💪 Don't give up! Try again."; gradeClass = "grade-fair"; }
     }
     
     const gradeEl = document.getElementById('grade-display');
@@ -792,8 +1027,7 @@ window.finishExam = function(manualSubmit) {
     
     showSection('result-section');
     
-    if (isSoundEnabled) {
-        speak(`Exam completed. Your score is ${score} out of ${total}, which is ${percentage} percent. Your grade is ${grade}.`);
+    if (isSoundEnabled) {        speak(`Exam completed. Your score is ${score} out of ${total}, which is ${percentage} percent. Your grade is ${grade}.`);
     }
 };
 
@@ -810,7 +1044,6 @@ document.addEventListener('click', function initSpeech() {
 console.log("🚀 HighGrade DLI App Loaded");
 console.log("🔥 Firestore DB:", db);
 
-// Replay current question audio
 window.replayCurrentQuestion = function() {
     if (currentQuestions.length === 0) return;
     
@@ -820,18 +1053,15 @@ window.replayCurrentQuestion = function() {
     }
 };
 
-// Handle when time runs out (FIXED: Saves answer as -1 immediately)
 function handleTimeUp() {
     clearInterval(timerInterval);
     
-    // Prevent double triggering
     if (userAnswers[currentQuestionIndex] !== undefined) {
         return;
     }
 
     const qData = currentQuestions[currentQuestionIndex];
     const correctIndex = qData.answer;
-        // CRITICAL FIX: Mark as timed out (-1) immediately so it can't be re-answered
     userAnswers[currentQuestionIndex] = -1;
     
     const buttons = document.querySelectorAll('.option-btn');
@@ -846,10 +1076,8 @@ function handleTimeUp() {
     const expBox = document.getElementById('explanation-box');
     const expText = document.getElementById('explanation-text');
     if (expBox && expText) {
-        expText.textContent = qData.exp || "No explanation available.";
-        expBox.style.display = 'block';
+        expText.textContent = qData.exp || "No explanation available.";        expBox.style.display = 'block';
         
-        // Add timeout message
         const timeoutMsg = document.createElement('div');
         timeoutMsg.style.cssText = 'color: #c62828; font-weight: bold; margin-bottom: 10px; padding: 10px; background: #ffebee; border-radius: 8px; text-align: center;';
         timeoutMsg.textContent = '⏰ Time was up for this question';

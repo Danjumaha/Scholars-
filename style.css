@@ -422,3 +422,206 @@ button.edit-btn { background: var(--accent); padding: 8px 16px; font-size: 14px;
         font-size: 0.9rem;
     }
 }
+
+
+
+
+
+
+
+
+/* ============ TOPIC MANAGEMENT STYLES ============ */
+
+.topic-manager {
+    background: var(--light);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.topic-input-group {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.topic-input-group input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.topic-input-group input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.topic-list {
+    margin-top: 15px;
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.topic-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.topic-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.topic-list::-webkit-scrollbar-thumb {    background: var(--primary);
+    border-radius: 10px;
+}
+
+.topic-item {
+    background: white;
+    padding: 15px 18px;
+    margin: 10px 0;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary);
+}
+
+.topic-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.topic-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 12px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.topic-name {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.topic-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.topic-actions button {    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.topic-actions .edit-topic-btn {
+    background: #2196F3;
+    color: white;
+}
+
+.topic-actions .edit-topic-btn:hover {
+    background: #1976D2;
+    transform: scale(1.05);
+}
+
+.topic-actions .delete-topic-btn {
+    background: #f44336;
+    color: white;
+}
+
+.topic-actions .delete-topic-btn:hover {
+    background: #d32f2f;
+    transform: scale(1.05);
+}
+
+.topic-select-dropdown {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid var(--primary);
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.topic-select-dropdown:hover {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.topic-select-dropdown:focus {
+    outline: none;
+    border-color: #764ba2;    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.topic-stats {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 18px;
+    border-radius: 12px;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .topic-input-group {
+        flex-direction: column;
+    }
+    
+    .topic-input-group input {
+        width: 100%;
+    }
+    
+    .topic-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .topic-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
